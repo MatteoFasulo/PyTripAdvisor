@@ -1,0 +1,12 @@
+- costruire una funzione che scrappi tutti i ristoranti presenti a roma iterando attraverso le pagine disponibili
+- eliminare i ristoranti che presentano l'attributo sponsorizzato vicino al nome perché tanto prima o poi torneranno nella lista completa
+- per ognuno dei ristoranti scrappati prendersi l'url del singolo ristorante che servirà come input alla funzione che prende le recensioni
+- costruire la funzione che iteri sulle recenesioni del singolo ristorante a partire dall'url dato e su tutte le pagine presenti
+- costruire una singola funzione che prenda i dati della recensione singola sulla pagina i della funzione precedente
+- costruire una funzione che prenda i dati del recensore sulla singola recensione i della pagina corrente
+- per ognuna delle recensioni prendere tutto il set di dati descritto nella struttura del DB e formattarlo correttamente
+- usare regex per i pattern noti tranne GROSSO PROBLEMA PER LA PROVENIENZA DI UN RECENSORE
+- sleep vari per evitare il ban con threshold o runif random uniform sleeptime
+- controllare i datatype nel DB e parsare bene tutte le date per analisi temporali
+- (+) dal nome del ristorante trovare le coordinate (lat, long) e mapparle su carta
+- join sulle foreign key delle tre tabelle: ristoranti, recensori, recensioni sugli attributi: nome_ristorante, user_recensore 
