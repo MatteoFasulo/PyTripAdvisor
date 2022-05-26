@@ -1,5 +1,5 @@
 # Title
-## Sbutitle
+## Subtitle
 Short summary
 
 ### Report
