@@ -10,3 +10,8 @@
 - controllare i datatype nel DB e parsare bene tutte le date per analisi temporali
 - (+) dal nome del ristorante trovare le coordinate (lat, long) e mapparle su carta
 - join sulle foreign key delle tre tabelle: ristoranti, recensori, recensioni sugli attributi: nome_ristorante, user_recensore 
+
+Lavoro da dividerci:
+- Fasada suggeriva di dividerci i compiti prendendo ognuno una funzione
+- Con selenium scraping dei dati
+- con beautifulsoup ci parsiamo l'HTML
