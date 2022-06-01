@@ -7,17 +7,6 @@ CREATE TABLE restaurants(
             restaurant_price REAL
         , address TEXT)
 CREATE TABLE sqlite_sequence(name,seq)
-CREATE TABLE reviewers(  
-    reviewer_name TEXT PRIMARY KEY NOT NULL,
-    profile_link TEXT NOT NULL,
-    total_reviews INTEGER,
-    reviewer_level INTEGER,
-    user_since TIMESTAMP,
-    home TEXT,
-    total_cities INTEGER,
-    total_helpful INTEGER
-)
-None
 CREATE TABLE reviews(  
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     restaurant_url TEXT NOT NULL,
@@ -31,3 +20,14 @@ CREATE TABLE reviews(
     review_text TEXT NOT NULL,
     review_url TEXT NOT NULL
 )
+CREATE TABLE reviewers(  
+    reviewer_name TEXT PRIMARY KEY NOT NULL,
+    profile_link TEXT NOT NULL,
+    total_reviews INTEGER,
+    reviewer_level INTEGER,
+    user_since TIMESTAMP,
+    home TEXT,
+    total_cities INTEGER,
+    total_helpful INTEGER
+)
+None

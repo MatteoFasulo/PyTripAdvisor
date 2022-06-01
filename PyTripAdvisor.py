@@ -92,23 +92,26 @@ class PyTripAdvisor:
                 container = driver.find_element(By.XPATH, ".//div[@data-test-target='restaurants-list']")
                 for restaurant in container.find_elements(By.XPATH, "//div[@class='cauvp Gi o']"):
                     try:
-                        url = restaurant.find_element(By.XPATH, ".//a[@class='bHGqj Cj b']").get_attribute("href")
-                        name = restaurant.find_element(By.XPATH, ".//a[@class='bHGqj Cj b']").text
+                        url = restaurant.find_element(By.XPATH, "//a[@class='bHGqj Cj b']").get_attribute("href")
+                        name = restaurant.find_element(By.XPATH, "//a[@class='bHGqj Cj b']").text
                         name = name[name.find('.')+1:].strip()
-                        total_reviews = restaurant.find_element(By.XPATH, ".//span[@class='NoCoR']").text
+                        total_reviews = restaurant.find_element(By.XPATH, "//span[@class='NoCoR']").text
                         try:
                             total_reviews = total_reviews[:total_reviews.find(' ')]
                             while '.' in total_reviews:
                                 total_reviews = total_reviews.replace('.', '')
-                            int(total_reviews)
+                            total_reviews = int(total_reviews)
                         except ValueError as er:
                             print(f'[!]\t{er}')
                             total_reviews = total_reviews[:total_reviews.find(' ')]
+                        
+                        if total_reviews < 50:
+                            continue
 
-                        rating = bs(restaurant.find_element(By.XPATH, ".//span[@class='bFlvo']").get_attribute("innerHTML"), 'html.parser').find('svg')['aria-label']
+                        rating = bs(restaurant.find_element(By.XPATH, "//span[@class='bFlvo']").get_attribute("innerHTML"), 'html.parser').find('svg')['aria-label']
                         rating = float(re.findall(r"[0-9]\,[0-9]", rating)[0].replace(',','.'))
 
-                        more_infos = restaurant.find_elements(By.XPATH, ".//span[@class='ceUbJ']")
+                        more_infos = restaurant.find_elements(By.XPATH, "//span[@class='ceUbJ']")
                         for info in more_infos:
                             if "€" in info.text and '-' in info.text:
                                 price1,price2 = info.text.strip().split('-')
@@ -181,7 +184,7 @@ class PyTripAdvisor:
                     total_reviews = 0
                     continue
 
-                if total_reviews < 10:
+                if total_reviews < 50:
                     continue
 
                 pages = int(total_reviews / 10)
@@ -243,7 +246,6 @@ class PyTripAdvisor:
                         ########################################################################
 
                         avatars = container[i].find_elements(By.XPATH, "//div[contains(@class, 'ui_avatar resp')]")
-                        #actions.move_to_element(avatars[i]).perform()
                         sleep(0.75)
                         avatars[i].click()
                         sleep(0.75)
