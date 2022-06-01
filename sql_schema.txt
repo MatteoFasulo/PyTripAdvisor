@@ -1,0 +1,33 @@
+CREATE TABLE restaurants(
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            restaurant_url TEXT NOT NULL,
+            restaurant_name TEXT NOT NULL,
+            restaurant_rating REAL,
+            restaurant_total_reviews INTEGER,
+            restaurant_price REAL
+        , address TEXT)
+CREATE TABLE sqlite_sequence(name,seq)
+CREATE TABLE reviewers(  
+    reviewer_name TEXT PRIMARY KEY NOT NULL,
+    profile_link TEXT NOT NULL,
+    total_reviews INTEGER,
+    reviewer_level INTEGER,
+    user_since TIMESTAMP,
+    home TEXT,
+    total_cities INTEGER,
+    total_helpful INTEGER
+)
+None
+CREATE TABLE reviews(  
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    restaurant_url TEXT NOT NULL,
+    reviewer_name TEXT NOT NULL,
+    review_title TEXT NOT NULL,
+    review_date TIMESTAMP NOT NULL,
+    review_visit_date TIMESTAMP NOT NULL,
+    review_rating INTEGER NOT NULL,
+    review_helpful INTEGER,
+    review_device TEXT,
+    review_text TEXT NOT NULL,
+    review_url TEXT NOT NULL
+)
