@@ -63,7 +63,7 @@ class PyTripAdvisor:
         pages = int(total_restaurants / 30)
         try:
             for page in range(1,pages+1):
-                print(f"Getting page {page}")
+                print(f"Getting page {page} / {pages}")
                 soup = bs(driver.page_source, 'html.parser')
                 container = driver.find_element(By.XPATH, ".//div[@data-test-target='restaurants-list']")
                 for restaurant in container.find_elements(By.XPATH, "//div[@class='cauvp Gi o']"):
@@ -114,7 +114,7 @@ class PyTripAdvisor:
         except KeyboardInterrupt:
             driver.close()
             sys.exit()
-            
+
         conn.close()  
         return None
 
