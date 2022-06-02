@@ -31,7 +31,7 @@ import constants as const
 from __init__ import __version__
 from db import createDB, exportSchema
 
-locale.setlocale(locale.LC_TIME, "it_IT")
+locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
 
 class PyTripAdvisor:
     def __init__(
