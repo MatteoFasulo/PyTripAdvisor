@@ -452,9 +452,13 @@ if __name__ == "__main__":
     #Bot.start_page(driver,page_num=89)
     #Bot.getRestaurants(driver,page_num=0)
     urls = Bot.restaurantUrls()
+    
+    urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d10540659-Reviews-Andy_Capp_Pizza-Rome_Lazio.html")-10):]
+    print(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d10540659-Reviews-Andy_Capp_Pizza-Rome_Lazio.html"))
     #drivers = [Bot.getDriver() for i in range(4)]
-    with ProcessPoolExecutor(max_workers=6) as executor:
-        result = [executor.map(Bot.getReviews, reversed(urls))]
+    with ProcessPoolExecutor(max_workers=18) as executor:
+        sleep(2)
+        result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
     """except Exception as er:
