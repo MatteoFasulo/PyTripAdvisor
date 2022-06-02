@@ -5,7 +5,8 @@ import sys
 import datetime as dt
 import locale
 
-import sqlite3
+#import sqlite3
+import mysql.connector
 import re
 
 from selenium import webdriver
@@ -29,9 +30,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import constants as const
 from __init__ import __version__
-from db import createDB, exportSchema
+from db import db_connect
 
-locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
+locale.setlocale(locale.LC_TIME, "it_IT")
 
 class PyTripAdvisor:
     def __init__(
@@ -44,8 +45,9 @@ class PyTripAdvisor:
         self.headless = headless
         self.small_sleep = 3
         self.big_sleep = 10
-        createDB()
-        exportSchema()
+        #createDB()
+        #exportSchema()
+        self.conn, self.cursor = db_connect()
 
         print(f"PyTripAdvisor Version: {__version__}")
     
@@ -57,35 +59,25 @@ class PyTripAdvisor:
             os.system('clear')
 
             
-    @staticmethod
-    def user_exist(user):
-        conn = sqlite3.connect(f'{const.DB_NAME}')
-        cursor = conn.cursor()
-        cursor.execute("SELECT EXISTS(SELECT 1 FROM reviewers WHERE reviewer_name=?)", (user,))
-        conn.commit()
-        result = cursor.fetchall()
+    def user_exist(self, user):
+        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM reviewers WHERE reviewer_name=%s)", (user,))
+        self.conn.commit()
+        result = self.cursor.fetchall()
         if result[0][0]:
             return True
         return False
 
-    @staticmethod
-    def restaurant_exist(url):
-        conn = sqlite3.connect(f'{const.DB_NAME}')
-        cursor = conn.cursor()
-        cursor.execute("SELECT EXISTS(SELECT 1 FROM restaurants WHERE restaurant_url=?)", (url,))
-        conn.commit()
-        result = cursor.fetchall()
+    def restaurant_exist(self, url):
+        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM restaurants WHERE restaurant_url=%s)", (url,))
+        result = self.cursor.fetchall()
         if result[0][0]:
             return True
         return False
 
-    @staticmethod
-    def review_exist(url):
-        conn = sqlite3.connect(f'{const.DB_NAME}')
-        cursor = conn.cursor()
-        cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=?)", (url,))
-        conn.commit()
-        result = cursor.fetchall()
+    def review_exist(self, url):
+        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=%s)", (url,))
+        self.conn.commit()
+        result = self.cursor.fetchall()
         if result[0][0]:
             return True
         return False
@@ -178,16 +170,14 @@ class PyTripAdvisor:
 
                         # add to DB
                         if not self.restaurant_exist(url):
-                            conn = sqlite3.connect(f'{const.DB_NAME}')
-                            cursor = conn.cursor()
-                            cursor.execute("INSERT INTO restaurants VALUES (?, ?, ?, ?, ?, ?)",
+                            self.cursor.execute("INSERT INTO restaurants VALUES (%s, %s, %s, %s, %s, %s)",
                             (url,
                             name,
                             rating,
                             total_reviews,
                             price,
                             None))
-                            conn.commit()
+                            self.conn.commit()
 
                     except Exception as er:
                         print(f'[!]\t{er}')
@@ -203,18 +193,16 @@ class PyTripAdvisor:
             print("[i]\texits gracefully 1")
             sys.exit()
 
-        conn.close()  
+        self.cursor.close()  
         return None
 
 
     def restaurantUrls(self):
-        conn = sqlite3.connect(f'{const.DB_NAME}')
-        conn.row_factory = lambda cursor, row: row[0] # workaround for tuple return of fetchall in sql
-        cursor = conn.cursor()
-        cursor.execute("SELECT restaurant_url FROM restaurants")
-        rows = cursor.fetchall()
-        conn.commit()
-        conn.close()
+        self.conn.row_factory = lambda cursor, row: row[0] # workaround for tuple return of fetchall in sql
+        self.cursor.execute("SELECT restaurant_url FROM restaurants")
+        rows = self.cursor.fetchall()
+        self.conn.commit()
+        self.cursor.close()
         return rows
 
     def getReviews(self, restaurant_url):
@@ -380,9 +368,7 @@ class PyTripAdvisor:
 
                     # add to DB
                     if not self.review_exist(url=review_url):
-                        conn = sqlite3.connect(f'{const.DB_NAME}')
-                        cursor = conn.cursor()
-                        cursor.execute("INSERT INTO reviews VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        self.cursor.execute("INSERT INTO reviews VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                         (review_url,
                         restaurant_url,
                         reviewer_name,
@@ -394,12 +380,10 @@ class PyTripAdvisor:
                         device,
                         review_text
                         ))
-                        conn.commit()
+                        self.conn.commit()
 
                     if not self.user_exist(user=reviewer_name):
-                        conn = sqlite3.connect(f'{const.DB_NAME}')
-                        cursor = conn.cursor()
-                        cursor.execute("INSERT INTO reviewers VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        self.cursor.execute("INSERT INTO reviewers VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                         (reviewer_name,
                         profile_link,
                         contributes,
@@ -409,8 +393,8 @@ class PyTripAdvisor:
                         cities,
                         helpfuls
                         ))
-                        conn.commit()
-                        conn.close()
+                        self.conn.commit()
+                        self.cursor.close()
 
                     WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable((By.XPATH, "//span[@class='ui_overlay ui_popover arrow_left ']/div[@class='ui_close_x']"))
@@ -432,11 +416,9 @@ class PyTripAdvisor:
                     break
                 sleep(.5)
                 
-            conn = sqlite3.connect(f'{const.DB_NAME}')
-            cursor = conn.cursor()
-            cursor.execute("UPDATE restaurants SET address=? WHERE restaurant_url=?", (restaurant_address,restaurant_url))
-            conn.commit()
-            conn.close()
+            self.cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
+            self.conn.commit()
+            self.cursor.close()
         except KeyboardInterrupt:
             driver.quit()
             print("[i]\texits gracefully")
@@ -448,15 +430,16 @@ class PyTripAdvisor:
 if __name__ == "__main__":
     Bot = PyTripAdvisor()
     Bot.clear()
-    #driver = Bot.getDriver()
+    #Bot.user_exist('pippo')
+    driver = Bot.getDriver()
     #try:
-    #Bot.search(driver)
+    Bot.search(driver)
     #Bot.start_page(driver,page_num=89)
-    #Bot.getRestaurants(driver,page_num=89)
-    urls = Bot.restaurantUrls()
+    Bot.getRestaurants(driver,page_num=0)
+    #urls = Bot.restaurantUrls()
     #drivers = [Bot.getDriver() for i in range(4)]
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        result = [executor.map(Bot.getReviews, urls)]
+    #with ProcessPoolExecutor(max_workers=4) as executor:
+    #    result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
     """except Exception as er:
