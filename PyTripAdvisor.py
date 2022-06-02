@@ -47,7 +47,6 @@ class PyTripAdvisor:
         self.big_sleep = 10
         #createDB()
         #exportSchema()
-        self.conn, self.cursor = db_connect()
 
         print(f"PyTripAdvisor Version: {__version__}")
     
@@ -58,27 +57,34 @@ class PyTripAdvisor:
         else:
             os.system('clear')
 
-            
-    def user_exist(self, user):
-        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM reviewers WHERE reviewer_name=%s)", (user,))
-        self.conn.commit()
-        result = self.cursor.fetchall()
+    @staticmethod
+    def user_exist(user):
+        conn, cursor = db_connect()
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM reviewers WHERE reviewer_name=%s)", (user,))
+        conn.commit()
+        result = cursor.fetchall()
+        cursor.close()
         if result[0][0]:
             return True
         return False
 
-    def restaurant_exist(self, url):
-        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM restaurants WHERE restaurant_url=%s)", (url,))
-        result = self.cursor.fetchall()
+    @staticmethod
+    def restaurant_exist(url):
+        conn, cursor = db_connect()
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM restaurants WHERE restaurant_url=%s)", (url,))
+        result = cursor.fetchall()
+        cursor.close()
         if result[0][0]:
             return True
         return False
         
-
-    def review_exist(self, url):
-        self.cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=%s)", (url,))
-        self.conn.commit()
-        result = self.cursor.fetchall()
+    @staticmethod
+    def review_exist(url):
+        conn, cursor = db_connect()
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=%s)", (url,))
+        conn.commit()
+        result = cursor.fetchall()
+        cursor.close()
         if result[0][0]:
             return True
         return False
@@ -171,14 +177,16 @@ class PyTripAdvisor:
 
                         # add to DB
                         if not self.restaurant_exist(url):
-                            self.cursor.execute("INSERT INTO restaurants VALUES (%s, %s, %s, %s, %s, %s)",
+                            conn, cursor = db_connect()
+                            cursor.execute("INSERT INTO restaurants VALUES (%s, %s, %s, %s, %s, %s)",
                             (url,
                             name,
                             rating,
                             total_reviews,
                             price,
                             None))
-                            self.conn.commit()
+                            conn.commit()
+                            cursor.close()
 
                     except Exception as er:
                         print(f'[!]\t{er}')
@@ -194,16 +202,16 @@ class PyTripAdvisor:
             print("[i]\texits gracefully 1")
             sys.exit()
 
-        self.cursor.close()  
         return None
 
 
     def restaurantUrls(self):
-        self.cursor.execute("SELECT restaurant_url FROM restaurants")
-        rows = self.cursor.fetchall()
+        conn, cursor = db_connect()
+        cursor.execute("SELECT restaurant_url FROM restaurants")
+        rows = cursor.fetchall()
         rows = [x[0] for x in rows]
-        self.conn.commit()
-        self.cursor.close()
+        conn.commit()
+        cursor.close()
         return rows
 
     def getReviews(self, restaurant_url):
@@ -369,7 +377,8 @@ class PyTripAdvisor:
 
                     # add to DB
                     if not self.review_exist(url=review_url):
-                        self.cursor.execute("INSERT INTO reviews VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        conn, cursor = db_connect()
+                        cursor.execute("INSERT INTO reviews VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                         (review_url,
                         restaurant_url,
                         reviewer_name,
@@ -381,10 +390,12 @@ class PyTripAdvisor:
                         device,
                         review_text
                         ))
-                        self.conn.commit()
+                        conn.commit()
+                        cursor.close()
 
                     if not self.user_exist(user=reviewer_name):
-                        self.cursor.execute("INSERT INTO reviewers VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                        conn, cursor = db_connect()
+                        cursor.execute("INSERT INTO reviewers VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                         (reviewer_name,
                         profile_link,
                         contributes,
@@ -394,8 +405,8 @@ class PyTripAdvisor:
                         cities,
                         helpfuls
                         ))
-                        self.conn.commit()
-                        self.cursor.close()
+                        conn.commit()
+                        cursor.close()
 
                     WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable((By.XPATH, "//span[@class='ui_overlay ui_popover arrow_left ']/div[@class='ui_close_x']"))
@@ -416,10 +427,11 @@ class PyTripAdvisor:
                     print(e.with_traceback())
                     break
                 sleep(.5)
-                
-            self.cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
-            self.conn.commit()
-            self.cursor.close()
+            
+            conn, cursor = db_connect()
+            cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
+            conn.commit()
+            cursor.close()
         except KeyboardInterrupt:
             driver.quit()
             print("[i]\texits gracefully")
@@ -432,15 +444,15 @@ if __name__ == "__main__":
     Bot = PyTripAdvisor()
     Bot.clear()
     #Bot.user_exist('pippo')
-    driver = Bot.getDriver()
+    #driver = Bot.getDriver()
     #try:
-    Bot.search(driver)
+    #Bot.search(driver)
     #Bot.start_page(driver,page_num=89)
-    Bot.getRestaurants(driver,page_num=0)
-    #urls = Bot.restaurantUrls()
+    #Bot.getRestaurants(driver,page_num=0)
+    urls = Bot.restaurantUrls()
     #drivers = [Bot.getDriver() for i in range(4)]
-    #with ProcessPoolExecutor(max_workers=4) as executor:
-    #    result = [executor.map(Bot.getReviews, urls)]
+    with ProcessPoolExecutor(max_workers=6) as executor:
+        result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
     """except Exception as er:
