@@ -32,7 +32,7 @@ import constants as const
 from __init__ import __version__
 from db import db_connect
 
-locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")       #in linux use this: "it_IT.UTF-8"
+locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
 
 class PyTripAdvisor:
     def __init__(
@@ -63,7 +63,7 @@ class PyTripAdvisor:
         cursor.execute("SELECT EXISTS(SELECT 1 FROM reviewers WHERE reviewer_name=%s)", (user,))
         conn.commit()
         result = cursor.fetchall()
-        cursor.close()
+        conn.close()
         if result[0][0]:
             return True
         return False
@@ -73,7 +73,7 @@ class PyTripAdvisor:
         conn, cursor = db_connect()
         cursor.execute("SELECT EXISTS(SELECT 1 FROM restaurants WHERE restaurant_url=%s)", (url,))
         result = cursor.fetchall()
-        cursor.close()
+        conn.close()
         if result[0][0]:
             return True
         return False
@@ -84,7 +84,7 @@ class PyTripAdvisor:
         cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=%s)", (url,))
         conn.commit()
         result = cursor.fetchall()
-        cursor.close()
+        conn.close()
         if result[0][0]:
             return True
         return False
@@ -186,7 +186,7 @@ class PyTripAdvisor:
                             price,
                             None))
                             conn.commit()
-                            cursor.close()
+                            conn.close()
 
                     except Exception as er:
                         print(f'[!]\t{er}')
@@ -211,7 +211,7 @@ class PyTripAdvisor:
         rows = cursor.fetchall()
         rows = [x[0] for x in rows]
         conn.commit()
-        cursor.close()
+        conn.close()
         return rows
 
     def getReviews(self, restaurant_url):
@@ -231,6 +231,11 @@ class PyTripAdvisor:
                 restaurant_address = driver.find_element(By.XPATH, "//span[@class='brMTW']").text
             except Exception as e:
                 restaurant_address = None
+
+            conn, cursor = db_connect()
+            cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
+            conn.commit()
+
             try:
                 total_reviews = driver.find_element(By.XPATH, "//span[@class='count']").text
                 total_reviews = re.findall(r"\d+", total_reviews)
@@ -391,7 +396,7 @@ class PyTripAdvisor:
                         review_text
                         ))
                         conn.commit()
-                        cursor.close()
+                        conn.close()
 
                     if not self.user_exist(user=reviewer_name):
                         conn, cursor = db_connect()
@@ -406,7 +411,7 @@ class PyTripAdvisor:
                         helpfuls
                         ))
                         conn.commit()
-                        cursor.close()
+                        conn.close()
 
                     WebDriverWait(driver, 10).until(
                         EC.element_to_be_clickable((By.XPATH, "//span[@class='ui_overlay ui_popover arrow_left ']/div[@class='ui_close_x']"))
@@ -427,11 +432,8 @@ class PyTripAdvisor:
                     print(e.with_traceback())
                     break
                 sleep(.5)
-            
-            conn, cursor = db_connect()
-            cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
-            conn.commit()
-            cursor.close()
+        
+            conn.close()
         except KeyboardInterrupt:
             driver.quit()
             print("[i]\texits gracefully")
@@ -452,7 +454,7 @@ if __name__ == "__main__":
     urls = Bot.restaurantUrls()
     #drivers = [Bot.getDriver() for i in range(4)]
     with ProcessPoolExecutor(max_workers=6) as executor:
-        result = [executor.map(Bot.getReviews, urls)]
+        result = [executor.map(Bot.getReviews, reversed(urls))]
 
     #Bot.getReviews(driver, urls)
     """except Exception as er:
