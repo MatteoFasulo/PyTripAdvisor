@@ -32,7 +32,7 @@ import constants as const
 from __init__ import __version__
 from db import db_connect
 
-locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
+locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")       #in linux use this: "it_IT.UTF-8"
 
 class PyTripAdvisor:
     def __init__(
@@ -73,6 +73,7 @@ class PyTripAdvisor:
         if result[0][0]:
             return True
         return False
+        
 
     def review_exist(self, url):
         self.cursor.execute("SELECT EXISTS(SELECT 1 FROM reviews WHERE review_url=%s)", (url,))
@@ -106,7 +107,7 @@ class PyTripAdvisor:
         sleep(self.small_sleep)
         driver.find_elements(By.XPATH, "//div[@class='dyTIx eMorU elMNN gayuF dWGsc ecxqv']")[3].click()
         sleep(1)
-        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located(By.XPATH, "//form[@class='bmTdH o']//input[@title='Cerca']"))
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//form[@class='bmTdH o']//input[@title='Cerca']")))
         actionChains = ActionChains(driver)
         actionChains.move_to_element(element).click().perform()
         sleep(.5)
@@ -198,9 +199,9 @@ class PyTripAdvisor:
 
 
     def restaurantUrls(self):
-        self.conn.row_factory = lambda cursor, row: row[0] # workaround for tuple return of fetchall in sql
         self.cursor.execute("SELECT restaurant_url FROM restaurants")
         rows = self.cursor.fetchall()
+        rows = [x[0] for x in rows]
         self.conn.commit()
         self.cursor.close()
         return rows
