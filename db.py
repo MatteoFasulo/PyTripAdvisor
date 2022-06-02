@@ -9,16 +9,16 @@ def createDB(name = const.DB_NAME):
         conn = sqlite3.connect(name)
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE restaurants(
-            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            restaurant_url TEXT NOT NULL,
+            restaurant_url TEXT PRIMARY KEY NOT NULL,
             restaurant_name TEXT NOT NULL,
             restaurant_rating REAL,
             restaurant_total_reviews INTEGER,
-            restaurant_price REAL
+            restaurant_price REAL,
+            address TEXT
         );''')
         conn.commit()
-        cursor.execute('''CREATE TABLE reviews(  
-            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        cursor.execute('''CREATE TABLE reviews( 
+            review_url TEXT PRIMARY KEY NOT NULL, 
             restaurant_url TEXT NOT NULL,
             reviewer_name TEXT NOT NULL,
             review_title TEXT NOT NULL,
@@ -27,8 +27,7 @@ def createDB(name = const.DB_NAME):
             review_rating INTEGER NOT NULL,
             review_helpful INTEGER,
             review_device TEXT,
-            review_text TEXT NOT NULL,
-            review_url TEXT NOT NULL
+            review_text TEXT NOT NULL
         );''')
         conn.commit()
         cursor.execute('''CREATE TABLE reviewers(  
