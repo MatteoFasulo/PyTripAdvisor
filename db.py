@@ -135,3 +135,14 @@ def db_connect():
 # ORDER BY n_review DESC;
 
 ##########################################################
+
+##########################################################
+
+# SELECT restaurants.restaurant_url, COUNT(*) AS n_review
+# FROM restaurants
+# INNER JOIN reviews
+# ON restaurants.restaurant_url = reviews.restaurant_url
+# GROUP BY restaurants.restaurant_url
+# ORDER BY n_review DESC
+
+##########################################################

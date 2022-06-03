@@ -55,13 +55,13 @@ def sqlToGeoJSON():
                 geojson.get('features').append(json_point)
 
         json.dump(geojson, file, indent=4)
-
-if __name__ == '__main__':
+    
+def map_maker(output_filename = 'mappa'):
     m = Map(location=[41.9028, 12.4964], 
-                    tiles="CartoDB positron", 
-                    zoom_start=9,
-                    zoom_control=True, 
-                    prefer_canvas=True)
+                tiles="CartoDB positron", 
+                zoom_start=9,
+                zoom_control=True, 
+                prefer_canvas=True)
 
     layers = ['Expensive','Reasonable','Cheap']
 
@@ -112,11 +112,13 @@ if __name__ == '__main__':
                     radius=sqrt(restaurant['properties']['total_reviews']),
                     popup=Popup(
                         IFrame(
-f"""<center><h3 style="font-family:'Raleway',sans-serif;font-size:18px;font-weight:800;display: flex;justify-content: center;align-items: center;">{restaurant['properties']['name']}</h3></center>
+f"""<div style="display: flex;height: 165px;justify-content: space-between;flex-direction: column;width: 220px;">
+<center><h3 style="font-family:'Raleway',sans-serif;font-size:18px;font-weight:800;">{restaurant['properties']['name']}</h3></center>
 <br>
 <center>Totale Recensioni: <strong>{restaurant['properties']['total_reviews']}</strong></center>
 <br>
-<center>&#8364; <strong>{restaurant['properties']['price']}</strong> | &#9733; <strong>{restaurant['properties']['rating']}</strong></center>""",
+<center>&#8364; | &#9733; <strong>{restaurant['properties']['rating']}</strong></center>
+</div>""",
 width=240,
 height=185)),
                     tooltip=restaurant['properties']['name'],
@@ -127,7 +129,17 @@ height=185)),
                 Circle(
                     location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
                     radius=sqrt(restaurant['properties']['total_reviews']),
-                    popup=f"<div><strong><i>{restaurant['properties']['name']}</i></strong><br><br>Totale Recensioni: <strong>{restaurant['properties']['total_reviews']}</strong><br>&#8364; <strong>{restaurant['properties']['price']}</strong> | <strong>{restaurant['properties']['rating']}</strong> &#9733;</div>",
+                    popup=Popup(
+                        IFrame(
+f"""<div style="display: flex;height: 165px;justify-content: space-between;flex-direction: column;width: 220px;">
+<center><h3 style="font-family:'Raleway',sans-serif;font-size:18px;font-weight:800;">{restaurant['properties']['name']}</h3></center>
+<br>
+<center>Totale Recensioni: <strong>{restaurant['properties']['total_reviews']}</strong></center>
+<br>
+<center>&#8364;&#8364; - &#8364;&#8364;&#8364; | &#9733; <strong>{restaurant['properties']['rating']}</strong></center>
+</div>""",
+width=240,
+height=185)),
                     tooltip=restaurant['properties']['name'],
                     color=rating_colors.get(str(restaurant['properties']['rating'])),
                     fill=True,
@@ -136,7 +148,17 @@ height=185)),
                 Circle(
                     location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
                     radius=sqrt(restaurant['properties']['total_reviews']),
-                    popup=f"<div><strong><i>{restaurant['properties']['name']}</i></strong><br><br>Totale Recensioni: <strong>{restaurant['properties']['total_reviews']}</strong><br>&#8364; <strong>{restaurant['properties']['price']}</strong> | <strong>{restaurant['properties']['rating']}</strong> &#9733;</div>",
+                    popup=Popup(
+                        IFrame(
+f"""<div style="display: flex;height: 165px;justify-content: space-between;flex-direction: column;width: 220px;">
+<center><h3 style="font-family:'Raleway',sans-serif;font-size:18px;font-weight:800;">{restaurant['properties']['name']}</h3></center>
+<br>
+<center>Totale Recensioni: <strong>{restaurant['properties']['total_reviews']}</strong></center>
+<br>
+<center>&#8364;&#8364;&#8364;&#8364; | &#9733; <strong>{restaurant['properties']['rating']}</strong></center>
+</div>""",
+width=240,
+height=185)),
                     tooltip=restaurant['properties']['name'],
                     color=rating_colors.get(str(restaurant['properties']['rating'])),
                     fill=True,
@@ -157,4 +179,10 @@ height=185)),
     TileLayer('cartodbdark_matter').add_to(m)
 
     LayerControl().add_to(m)
-    m.save('mappa.html')
+    m.save(f'{output_filename}.html')
+
+if __name__ == '__main__':
+    #sqlToGeoJSON()
+    #map_maker()
+    import geopandas ad gp
+    

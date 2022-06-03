@@ -455,7 +455,7 @@ if __name__ == "__main__":
     
     #drivers = [Bot.getDriver() for i in range(4)]
     with ProcessPoolExecutor(max_workers=4) as executor:
-        result = [executor.map(Bot.getReviews, urls[int(len(urls)/2):])]
+        result = [executor.map(Bot.getReviews, reversed(urls[:urls.index('https://www.tripadvisor.it/Restaurant_Review-g187791-d788912-Reviews-Pummarola_Drink_Ristorante-Rome_Lazio.html')]))]
 
     #Bot.getReviews(driver, urls)
     """except Exception as er:
