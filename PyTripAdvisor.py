@@ -5,7 +5,7 @@ import sys
 import datetime as dt
 import locale
 
-#import sqlite3
+from random import randint
 import mysql.connector #mysql-connector-python
 import re
 
@@ -32,7 +32,7 @@ import constants as const
 from __init__ import __version__
 from db import db_connect
 
-locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
+locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")       #in linux use this: "it_IT.UTF-8"
 
 class PyTripAdvisor:
     def __init__(
@@ -97,6 +97,10 @@ class PyTripAdvisor:
         if self.headless:
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--disable-gpu')
+        chrome_prefs = {}
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+        chrome_options.add_experimental_option('prefs', chrome_prefs)
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--incognito")
         #chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36')
@@ -453,11 +457,9 @@ if __name__ == "__main__":
     #Bot.getRestaurants(driver,page_num=0)
     urls = Bot.restaurantUrls()
     
-    urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d10540659-Reviews-Andy_Capp_Pizza-Rome_Lazio.html")-10):]
-    print(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d10540659-Reviews-Andy_Capp_Pizza-Rome_Lazio.html"))
+    urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d6561736-Reviews-IL_Gusto_Restaurant_Wok-Rome_Lazio.html")-18):]
     #drivers = [Bot.getDriver() for i in range(4)]
-    with ProcessPoolExecutor(max_workers=18) as executor:
-        sleep(2)
+    with ProcessPoolExecutor(max_workers=12) as executor:
         result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
