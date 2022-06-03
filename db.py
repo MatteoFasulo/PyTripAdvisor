@@ -52,7 +52,7 @@ import constants as const
             cursor = con.cursor()
             cursor.execute('SELECT sql FROM sqlite_master')
             for r in cursor.fetchall():
-                print(r[0], file=schema)
+                #print(r[0], file=schema)
             cursor.close()
     return"""
 
@@ -68,9 +68,9 @@ def query_unpack(query_result: list, key: str = None, unique: bool = False):
 def db_connect():
     try:
         conn = mysql.connector.connect(host="127.0.0.1", user="root", password="NQIDWqGCF6n4P1vb")
-        print("[SQL] Connected")
+        #print("[SQL] Connected")
         cursor = conn.cursor(buffered=True, dictionary=True)
-        print("[SQL] Cursor setup")
+        #print("[SQL] Cursor setup")
         cursor.execute("SHOW DATABASES")
         res = cursor.fetchall()
         dbs = query_unpack(res, "Database")
@@ -111,9 +111,9 @@ def db_connect():
                 review_text varchar(255) NOT NULL
             )""")
             conn.commit()
-            print(f"[SQL] {const.DB_NAME} database created")
+            #print(f"[SQL] {const.DB_NAME} database created")
 
-        print(f"[SQL] {const.DB_NAME} database found")
+        #print(f"[SQL] {const.DB_NAME} database found")
         cursor.execute(f"USE {const.DB_NAME}")
         cursor.execute("SHOW TABLES")
         res = cursor.fetchall()

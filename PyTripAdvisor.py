@@ -457,9 +457,10 @@ if __name__ == "__main__":
     #Bot.getRestaurants(driver,page_num=0)
     urls = Bot.restaurantUrls()
     
-    urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d6561736-Reviews-IL_Gusto_Restaurant_Wok-Rome_Lazio.html")-18):]
+    #urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d6561736-Reviews-IL_Gusto_Restaurant_Wok-Rome_Lazio.html")-18):]
+    urls = ["https://www.tripadvisor.it/Restaurant_Review-g187791-d1727980-Reviews-Hostaria_da_Corrado-Rome_Lazio.html", "https://www.tripadvisor.it/Restaurant_Review-g187791-d967428-Reviews-Target-Rome_Lazio.html"]
     #drivers = [Bot.getDriver() for i in range(4)]
-    with ProcessPoolExecutor(max_workers=12) as executor:
+    with ProcessPoolExecutor(max_workers=2) as executor:
         result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
