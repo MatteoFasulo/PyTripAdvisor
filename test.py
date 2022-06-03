@@ -1,12 +1,17 @@
+from cmath import log
 import json
-from db import db_connect
-from math import sqrt
+from math import sqrt, log
+
+import pandas as pd
+#import geopandas as gp
 
 import folium
 from folium import *
 from folium import plugins
 
 from OSMPythonTools.nominatim import Nominatim
+
+from db import db_connect
 
 def restaurantAddresses():
         conn, cursor = db_connect()
@@ -61,7 +66,7 @@ def map_maker(output_filename = 'mappa'):
                 tiles="CartoDB positron", 
                 zoom_start=9,
                 zoom_control=True, 
-                prefer_canvas=True)
+                prefer_canvas=False)
 
     layers = ['Expensive','Reasonable','Cheap']
 
@@ -106,10 +111,12 @@ def map_maker(output_filename = 'mappa'):
         restaurants = json.load(file).get('features')
 
         for restaurant in restaurants:
+            if restaurant['properties']['total_reviews'] < 90:
+                continue
             if float(restaurant['properties']['price']) == 1.0:
                 Circle(
                     location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
-                    radius=sqrt(restaurant['properties']['total_reviews']),
+                    radius=log(restaurant['properties']['total_reviews']),
                     popup=Popup(
                         IFrame(
 f"""<div style="display: flex;height: 165px;justify-content: space-between;flex-direction: column;width: 220px;">
@@ -181,16 +188,15 @@ height=185)),
     LayerControl().add_to(m)
     m.save(f'{output_filename}.html')
 
+
+def merge_municipi(filename='municipi.geojson'):
+    df = gp.read_file("points.geojson")
+    municipi = gp.read_file(filename)
+    points_within = gp.sjoin(df, municipi, op="within")
+    points_within.to_csv("ristoranti_zone.csv")
+
 if __name__ == '__main__':
     #sqlToGeoJSON()
     #map_maker()
-    import pandas as pd
-    print(pd.read_csv("test.csv").head())
-    #import geopandas as gp
-    #df = gp.read_file("points.geojson")
-    #municipi = gp.read_file("municipi.geojson")
-    #points_within = gp.sjoin(df, municipi, op="within")
-    #points_within.to_csv("test.csv")
-
-    #print(df.head())
+    merge_municipi()
     
