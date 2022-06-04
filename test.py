@@ -1,17 +1,15 @@
-from cmath import log
 import json
-from math import sqrt, log
+from db import db_connect
+from math import sqrt
 
 import pandas as pd
-#import geopandas as gp
+import geopandas as gp
 
 import folium
 from folium import *
 from folium import plugins
 
 from OSMPythonTools.nominatim import Nominatim
-
-from db import db_connect
 
 def restaurantAddresses():
         conn, cursor = db_connect()
@@ -66,7 +64,7 @@ def map_maker(output_filename = 'mappa'):
                 tiles="CartoDB positron", 
                 zoom_start=9,
                 zoom_control=True, 
-                prefer_canvas=False)
+                prefer_canvas=True)
 
     layers = ['Expensive','Reasonable','Cheap']
 
@@ -111,12 +109,10 @@ def map_maker(output_filename = 'mappa'):
         restaurants = json.load(file).get('features')
 
         for restaurant in restaurants:
-            if restaurant['properties']['total_reviews'] < 90:
-                continue
             if float(restaurant['properties']['price']) == 1.0:
                 Circle(
                     location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
-                    radius=log(restaurant['properties']['total_reviews']),
+                    radius=sqrt(restaurant['properties']['total_reviews']),
                     popup=Popup(
                         IFrame(
 f"""<div style="display: flex;height: 165px;justify-content: space-between;flex-direction: column;width: 220px;">
@@ -188,15 +184,42 @@ height=185)),
     LayerControl().add_to(m)
     m.save(f'{output_filename}.html')
 
-
 def merge_municipi(filename='municipi.geojson'):
     df = gp.read_file("points.geojson")
     municipi = gp.read_file(filename)
     points_within = gp.sjoin(df, municipi, op="within")
     points_within.to_csv("ristoranti_zone.csv")
 
+def get_cuisines_diets(restaurant_url):
+    cursor.execute("SELECT cuisine, diet FROM restaurants WHERE restaurant_url = %s", (restaurant_url,))
+    rows = cursor.fetchall()
+    if len(rows) != 0:
+        try:
+            cuisines = rows[0][0]
+        except:
+            cuisines = None
+        try:
+            diets = rows[0][1]
+        except:
+            diets = None
+        conn.commit()
+        return cuisines, diets
+    else:
+        return None, None
+
+def restaurants_with_cuisine(filename='ristoranti_zone.csv'):
+    df = pd.read_csv(filename, encoding='utf-8')
+    df[['cuisines','diets']] = df.apply(lambda x: get_cuisines_diets(x.url), axis=1, result_type='expand')
+    new_df = df
+    new_df.to_csv("ristoranti_zone_cucine.csv", encoding="utf-8")
+    return
+
 if __name__ == '__main__':
     #sqlToGeoJSON()
     #map_maker()
-    merge_municipi()
+    #merge_municipi()
+    conn, cursor = db_connect()
+    restaurants_with_cuisine()
+    #get_cuisines_diets("Il Casale dell'Antico Arte & Vino")
+    conn.close()
     
