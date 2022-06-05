@@ -1,9 +1,26 @@
-# Title
-## Subtitle
-Short summary
+# PyTripAdvisor
+## Ristoranti
+L’obiettivo del progetto è quello di proporre un’analisi sulle caratteristiche principali dei ristoranti
+di Roma, servendosi delle recensioni lasciate dai clienti sul sito web di TripAdvisor. Quest’ultimo
+presenta i nomi e le informazioni di 30 ristoranti su ogni pagina contenenti a loro volta 10 recensioni
+per foglio. Vogliamo studiare la distribuzione dei ristoranti sul territorio romano, tenendo conto
+di:
+* informazioni sui ristoranti
+  * url,
+  * nome del ristorante,
+  * totale recensioni,
+  * indirizzo del ristorante.
+* informazioni sul recensore
+  * rating,
+  * data di visita,
+  * data della recensione,
+  * helpful,
+  * nome della recensione,
+  * citta di provenienza del recensore,
+  * device utilizzato per recensire.
 
 ### Report
-Report [here]()
+La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/PyTripAdvisor_Report.pdf)
 
 ### PyTripAdvisor Class
 `PyTripAdvisor`:
@@ -35,6 +52,11 @@ Report [here]()
 | [Random]| pseudo-random number generators for various distributions.
 | [Matplotlib]| library for creating static, animated, and interactive visualizations in Python.
 | [Plotly]| graphing library makes interactive, publication-quality graphs.
+| [Regex]| graphing library makes interactive, publication-quality graphs.
+| [Selenium]| graphing library makes interactive, publication-quality graphs.
+| [BeautifulSoup]| graphing library makes interactive, publication-quality graphs.
+| [MySQL]| graphing library makes interactive, publication-quality graphs.
+| [WordCloud]| graphing library makes interactive, publication-quality graphs.
 
 [os]: <https://docs.python.org/3/library/os.html>
 [json]: <https://docs.python.org/3/library/json.html>
