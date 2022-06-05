@@ -2,6 +2,9 @@ import json
 from db import db_connect
 from math import sqrt
 
+import pandas as pd
+import geopandas as gp
+
 import folium
 from folium import *
 from folium import plugins
@@ -181,16 +184,42 @@ height=185)),
     LayerControl().add_to(m)
     m.save(f'{output_filename}.html')
 
+def merge_municipi(filename='municipi.geojson'):
+    df = gp.read_file("points.geojson")
+    municipi = gp.read_file(filename)
+    points_within = gp.sjoin(df, municipi, op="within")
+    points_within.to_csv("ristoranti_zone.csv")
+
+def get_cuisines_diets(restaurant_url):
+    cursor.execute("SELECT cuisine, diet FROM restaurants WHERE restaurant_url = %s", (restaurant_url,))
+    rows = cursor.fetchall()
+    if len(rows) != 0:
+        try:
+            cuisines = rows[0][0]
+        except:
+            cuisines = None
+        try:
+            diets = rows[0][1]
+        except:
+            diets = None
+        conn.commit()
+        return cuisines, diets
+    else:
+        return None, None
+
+def restaurants_with_cuisine(filename='ristoranti_zone.csv'):
+    df = pd.read_csv(filename, encoding='utf-8')
+    df[['cuisines','diets']] = df.apply(lambda x: get_cuisines_diets(x.url), axis=1, result_type='expand')
+    new_df = df
+    new_df.to_csv("ristoranti_zone_cucine.csv", encoding="utf-8")
+    return
+
 if __name__ == '__main__':
     #sqlToGeoJSON()
     #map_maker()
-    import pandas as pd
-    print(pd.read_csv("test.csv").head())
-    #import geopandas as gp
-    #df = gp.read_file("points.geojson")
-    #municipi = gp.read_file("municipi.geojson")
-    #points_within = gp.sjoin(df, municipi, op="within")
-    #points_within.to_csv("test.csv")
-
-    #print(df.head())
+    #merge_municipi()
+    conn, cursor = db_connect()
+    restaurants_with_cuisine()
+    #get_cuisines_diets("Il Casale dell'Antico Arte & Vino")
+    conn.close()
     

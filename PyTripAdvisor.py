@@ -1,3 +1,4 @@
+from this import d
 from time import sleep
 import os
 import time
@@ -6,6 +7,7 @@ import datetime as dt
 import locale
 
 from random import randint
+from matplotlib.font_manager import json_dump
 import mysql.connector #mysql-connector-python
 import re
 
@@ -27,6 +29,14 @@ from concurrent.futures import ProcessPoolExecutor
 from bs4 import BeautifulSoup as bs
 
 from webdriver_manager.chrome import ChromeDriverManager
+
+import nltk
+from nltk.tokenize import word_tokenize, RegexpTokenizer
+from nltk.corpus import stopwords
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 import constants as const
 from __init__ import __version__
@@ -77,6 +87,16 @@ class PyTripAdvisor:
         if result[0][0]:
             return True
         return False
+    
+    @staticmethod
+    def restaurant_cuisine_exist(url):
+        conn, cursor = db_connect()
+        cursor.execute("SELECT cuisine FROM restaurants WHERE restaurant_url = %s", (url,))
+        result = cursor.fetchall()
+        conn.close()
+        if result[0][0] == None:
+            return False
+        return True
         
     @staticmethod
     def review_exist(url):
@@ -98,9 +118,10 @@ class PyTripAdvisor:
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--disable-gpu')
         chrome_prefs = {}
-        chrome_prefs["profile.default_content_settings"] = {"images": 2}
-        chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
-        chrome_options.add_experimental_option('prefs', chrome_prefs)
+        chrome_options.add_experimental_option( "prefs",{'profile.managed_default_content_settings.javascript': 2})
+        #chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        #chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+        #chrome_options.add_experimental_option('prefs', chrome_prefs)
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--incognito")
         #chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36')
@@ -126,87 +147,206 @@ class PyTripAdvisor:
         actionChains.move_to_element(element).send_keys(Keys.ENTER).perform()
         sleep(5)
 
-    def start_page(self, driver, page_num):
-        driver.get(f"{const.BASE_URL}/RestaurantSearch-g187791-oa{page_num*30}-a_date.2022__2D__06__2D__02-a_people.2-a_time.20%3A00%3A00-a_zur.2022__5F__06__5F__02-Rome_L.html#EATERY_LIST_CONTENTS")
+    def start_page(self, page_url):
+        driver = self.getDriver()
+        #driver.get(f"{const.BASE_URL}/RestaurantSearch-g187791-oa{page_num*30}-a_date.2022__2D__06__2D__02-a_people.2-a_time.20%3A00%3A00-a_zur.2022__5F__06__5F__02-Rome_L.html#EATERY_LIST_CONTENTS")
+        driver.get(page_url)
         sleep(self.small_sleep)
-        driver.find_element(By.XPATH, "//button[text()='Accetto']").click()     #Accetta i cookie
-        sleep(self.small_sleep)
+        try:
+            driver.find_element(By.XPATH, "//button[text()='Accetto']").click()     #Accetta i cookie
+            sleep(self.small_sleep)
+        except Exception:
+            pass
         next = driver.find_element(By.XPATH, "//div[@class='unified pagination js_pageLinks']/a[contains(text(),'Avanti')]")
         actionChains = ActionChains(driver)
         actionChains.move_to_element(next).perform()
         sleep(.5)
         next.click()
         sleep(2)
+        return driver
 
-    def getRestaurants(self, driver, page_num=0):
-        total_restaurants = int(driver.find_element(By.XPATH, ".//span[@class='ffdhf b']").text.strip())
-        pages = int(total_restaurants / 30)
+
+    def getRestaurants(self, page_url):
+        driver = self.getDriver()
+        driver.get(page_url)
+        sleep(3)
         actionChains = ActionChains(driver)
-        try:
-            for page in range(1+page_num,pages+1):
-                print(f"Getting page {page} / {pages}")
-                sleep(1)
-                container = driver.find_element(By.XPATH, "//div[@data-test-target='restaurants-list']")
-                actionChains.move_to_element(container).perform()
-                sleep(.15)
-                for restaurant in container.find_elements(By.XPATH, ".//div[@class='cauvp Gi o']"):
-                    try:
-                        url_name = restaurant.find_element(By.XPATH, ".//a[@class='bHGqj Cj b']")
-                        url = url_name.get_attribute("href")
-                        name = url_name.text
-                        name = name[name.find('.')+1:].strip()
-                        total_reviews = restaurant.find_element(By.XPATH, ".//span[@class='NoCoR']").text
-                        try:
-                            total_reviews = total_reviews[:total_reviews.find(' ')]
-                            while '.' in total_reviews:
-                                total_reviews = total_reviews.replace('.', '')
-                            total_reviews = int(total_reviews)
-                        except ValueError as er:
-                            print(f'[!]\t{er}')
-                            total_reviews = total_reviews[:total_reviews.find(' ')]
-                        
-                        if total_reviews < 50:
-                            continue
-
-                        rating = bs(restaurant.find_element(By.XPATH, ".//span[@class='bFlvo']").get_attribute("innerHTML"), 'html.parser').find('svg')['aria-label']
-                        rating = float(re.findall(r"[0-9]\,[0-9]", rating)[0].replace(',','.'))
-
-                        more_infos = restaurant.find_elements(By.XPATH, ".//span[@class='ceUbJ']")
-                        for info in more_infos:
-                            if "€" in info.text and '-' in info.text:
-                                price1,price2 = info.text.strip().split('-')
-                                price = (price1.count('€')+price2.count('€'))/2
-                            elif "€" in info.text:
-                                price = info.text.strip().count('€')
-
-                        # add to DB
-                        if not self.restaurant_exist(url):
-                            conn, cursor = db_connect()
-                            cursor.execute("INSERT INTO restaurants VALUES (%s, %s, %s, %s, %s, %s)",
-                            (url,
-                            name,
-                            rating,
-                            total_reviews,
-                            price,
-                            None))
-                            conn.commit()
-                            conn.close()
-
-                    except Exception as er:
-                        print(f'[!]\t{er}')
-                        continue
+        container = driver.find_element(By.XPATH, "//div[@data-test-target='restaurants-list']")
+        actionChains.move_to_element(container).perform()
+        sleep(.15)
+        for restaurant in container.find_elements(By.XPATH, ".//div[@class='cauvp Gi o']"):
+            try:
+                url_name = restaurant.find_element(By.XPATH, ".//a[@class='bHGqj Cj b']")
+                url = url_name.get_attribute("href")
+                name = url_name.text
+                name = name[name.find('.')+1:].strip()
+                total_reviews = restaurant.find_element(By.XPATH, ".//span[@class='NoCoR']").text # se non lo trova allora è un neo-ristorante
+                try:
+                    total_reviews = total_reviews[:total_reviews.find(' ')]
+                    while '.' in total_reviews:
+                        total_reviews = total_reviews.replace('.', '')
+                    total_reviews = int(total_reviews)
+                except ValueError as er:
+                    print(f'[!]\t{er}')
+                    total_reviews = total_reviews[:total_reviews.find(' ')]
                 
-                next = driver.find_element(By.XPATH, "//div[@class='unified pagination js_pageLinks']/a[contains(text(),'Avanti')]")
-                actionChains.move_to_element(next).perform()
-                sleep(.5)
-                next.click()
-                sleep(1.5)
-        except KeyboardInterrupt:
-            driver.close()
-            print("[i]\texits gracefully 1")
-            sys.exit()
+                """if total_reviews < 50:
+                    continue"""
 
+                rating = bs(restaurant.find_element(By.XPATH, ".//span[@class='bFlvo']").get_attribute("innerHTML"), 'html.parser').find('svg')['aria-label']
+                rating = float(re.findall(r"[0-9]\,[0-9]", rating)[0].replace(',','.'))
+
+                more_infos = restaurant.find_elements(By.XPATH, ".//span[@class='ceUbJ']")
+                for info in more_infos:
+                    if "€" in info.text and '-' in info.text:
+                        price1,price2 = info.text.strip().split('-')
+                        price = (price1.count('€')+price2.count('€'))/2
+                    elif "€" in info.text:
+                        price = info.text.strip().count('€')
+
+                # add to DB
+                if not self.restaurant_cuisine_exist(url):
+                    # get address by switching to next tab and then go back to main tab
+                    restaurant_window = driver.current_window_handle
+                    driver.execute_script("window.open('{}');".format(url))
+                    driver.switch_to.window(driver.window_handles[-1])
+                    sleep(.35)
+                    try:
+                        info_restaurant_box = driver.find_element(By.XPATH, "//div[@class='guXtP']")
+                        for box in info_restaurant_box.find_elements(By.XPATH, ".//div/div[@class='dMshX b']"):
+                            div_name = box.text.lower().strip()
+                            i = info_restaurant_box.find_elements(By.XPATH, ".//div/div[@class='dMshX b']").index(box)
+                            if div_name == 'cucine':
+                                try:
+                                    cuisines = info_restaurant_box.find_element(By.XPATH, f".//div[{i+1}]/div[@class='cfvAV']").text
+                                    #print(f"{cuisines = }")
+                                except Exception as e:
+                                    print(e)
+                                    cuisines = None
+                                    #print(f"{cuisines = }")
+                            elif div_name == 'diete speciali':
+                                try:
+                                    diets = info_restaurant_box.find_element(By.XPATH, f".//div[{i+1}]/div[@class='cfvAV']").text
+                                    #print(f"{diets = }")
+                                except Exception as e:
+                                    print(e)
+                                    diets = None
+                                    #print(f"{diets = }")
+                            else:
+                                continue
+
+                    except Exception as e:
+                        print(e)
+                        cuisines = None
+                        diets = None
+
+                    #try: 
+                    #    restaurant_address = driver.find_element(By.XPATH, "//span[@class='brMTW']").text
+                    #except Exception as e:
+                    #    restaurant_address = None
+                    
+                    driver.close()
+                    driver.switch_to.window(restaurant_window)
+
+                    conn, cursor = db_connect()
+                    cursor.execute("UPDATE restaurants SET cuisine = %s, diet = %s WHERE restaurant_url = %s",
+                    (cuisines,
+                    diets,
+                    url))
+                    conn.commit()
+                    conn.close()
+
+            except Exception as er:
+                print(f'[!]\t{er}')
+                continue
+        
+        driver.quit()
         return None
+
+
+#    def getRestaurants(self, driver, page_num=0):
+#        total_restaurants = int(driver.find_element(By.XPATH, ".//span[@class='ffdhf b']").text.strip())
+#        pages = int(total_restaurants / 30)
+#        actionChains = ActionChains(driver)
+#        try:
+#            for page in range(1+page_num,pages+1):
+#                print(f"Getting page {page} / {pages}")
+#                sleep(1)
+#                container = driver.find_element(By.XPATH, "//div[@data-test-target='restaurants-list']")
+#                actionChains.move_to_element(container).perform()
+#                sleep(.15)
+#                for restaurant in container.find_elements(By.XPATH, ".//div[@class='cauvp Gi o']"):
+#                    try:
+#                        url_name = restaurant.find_element(By.XPATH, ".//a[@class='bHGqj Cj b']")
+#                        url = url_name.get_attribute("href")
+#                        name = url_name.text
+#                        name = name[name.find('.')+1:].strip()
+#                        total_reviews = restaurant.find_element(By.XPATH, ".//span[@class='NoCoR']").text
+#                        try:
+#                            total_reviews = total_reviews[:total_reviews.find(' ')]
+#                            while '.' in total_reviews:
+#                                total_reviews = total_reviews.replace('.', '')
+#                            total_reviews = int(total_reviews)
+#                        except ValueError as er:
+#                            print(f'[!]\t{er}')
+#                            total_reviews = total_reviews[:total_reviews.find(' ')]
+#                        
+#                        if total_reviews < 200:
+#                            continue
+#
+#                        rating = bs(restaurant.find_element(By.XPATH, ".//span[@class='bFlvo']").get_attribute("innerHTML"), 'html.parser').find('svg')['aria-label']
+#                        rating = float(re.findall(r"[0-9]\,[0-9]", rating)[0].replace(',','.'))
+#
+#                        more_infos = restaurant.find_elements(By.XPATH, ".//span[@class='ceUbJ']")
+#                        for info in more_infos:
+#                            if "€" in info.text and '-' in info.text:
+#                                price1,price2 = info.text.strip().split('-')
+#                                price = (price1.count('€')+price2.count('€'))/2
+#                            elif "€" in info.text:
+#                                price = info.text.strip().count('€')
+#
+#                        # add to DB
+#                        if not self.restaurant_exist(url):                            
+#
+#                            # get address by switching to next tab and then go back to main tab
+#                            restaurant_window = driver.current_window_handle
+#                            driver.execute_script("window.open('{}');".format(url))
+#                            driver.switch_to.window(driver.window_handles[-1])
+#                            sleep(.5)
+#                            try: 
+#                                restaurant_address = driver.find_element(By.XPATH, "//span[@class='brMTW']").text
+#                            except Exception as e:
+#                                restaurant_address = None
+#
+#                            conn, cursor = db_connect()
+#                            cursor.execute("INSERT INTO restaurants VALUES (%s, %s, %s, %s, %s, %s)",
+#                            (url,
+#                            name,
+#                            rating,
+#                            total_reviews,
+#                            price,
+#                            restaurant_address))
+#                            conn.commit()
+#                            conn.close()
+#
+#                            driver.close()
+#                            driver.switch_to.window(restaurant_window)
+#
+#                    except Exception as er:
+#                        print(f'[!]\t{er}')
+#                        continue
+#                
+#                next = driver.find_element(By.XPATH, "//div[@class='unified pagination js_pageLinks']/a[contains(text(),'Avanti')]")
+#                actionChains.move_to_element(next).perform()
+#                sleep(.5)
+#                next.click()
+#                sleep(1.5)
+#        except KeyboardInterrupt:
+#            driver.close()
+#            print("[i]\texits gracefully 1")
+#            sys.exit()
+#
+#        return None
 
 
     def restaurantUrls(self):
@@ -217,6 +357,7 @@ class PyTripAdvisor:
         conn.commit()
         conn.close()
         return rows
+
 
     def getReviews(self, restaurant_url):
         driver = self.getDriver()
@@ -254,6 +395,10 @@ class PyTripAdvisor:
             if pages > 20: 
                 pages = 20 # max 200 per restaurant
 
+            if pages < 11:
+                driver.quit()
+                return
+
             for page in range(0,pages):
                 print(f"[i] Getting page {page} / {pages}")
                 try:
@@ -262,20 +407,19 @@ class PyTripAdvisor:
                 except Exception as e:
                     pass
                 
-                container = driver.find_elements(By.XPATH, "//div[@class='review-container']")
-                actions = ActionChains(driver)
-
                 try:
+                    container = driver.find_elements(By.XPATH, "//div[@class='review-container']")
+                    actions = ActionChains(driver)
                     actions.move_to_element(container[0]).perform()
                 except Exception as e:
                     pass
-
+                
+                skipped = 0
                 for i in range(0, len(container)):
                     # if exists, skip
                     review_url = container[i].find_element(By.XPATH, ".//a[@class='title ']").get_attribute("href")
                     if self.review_exist(review_url):
-                        stop = time.perf_counter()
-                        print(f"[i] page n°{page} took {stop - start:0.4f} seconds")
+                        skipped += 1
                         continue
 
                     rating = container[i].find_element(By.XPATH, ".//span[contains(@class, 'ui_bubble_rating bubble_')]").get_attribute("class").split("_")[3]
@@ -326,7 +470,7 @@ class PyTripAdvisor:
                     
 
                     actions.move_to_element(container[i].find_element(By.XPATH, ".//span[@class='noQuotes']")).perform()
-                    sleep(0.75)
+                    
                     avatar = WebDriverWait(container[i], 10).until(EC.element_to_be_clickable((By.XPATH, ".//div[contains(@class, 'ui_avatar resp')]")))
                     avatar.click()
                     sleep(0.75)
@@ -424,7 +568,7 @@ class PyTripAdvisor:
                     sleep(.5)
 
                 stop = time.perf_counter()
-                print(f"[i] page n°{page} took {stop - start:0.4f} seconds")
+                print(f"[i] page n°{page} took {stop - start:0.4f} seconds;\t reviews skipped = {skipped}")
                 
                 try:
                     next = driver.find_element(By.XPATH, "//div[@class='unified ui_pagination ']/a[contains(text(),'Avanti')]")
@@ -438,13 +582,70 @@ class PyTripAdvisor:
                 sleep(.5)
         
             conn.close()
-        except KeyboardInterrupt:
-            driver.quit()
+        except Exception as er:
             print("[i]\texits gracefully")
-            sys.exit()
+            print(f"[!]\t{er.with_traceback()}")
+            #urls_err.append(restaurant_url)
+            driver.quit()
+            #sys.exit()
+            return restaurant_url
         driver.quit()
         return
 
+    @staticmethod
+    def getRestaurantsTrheshold(threshold):
+        conn, cursor = db_connect()
+        cursor.execute("SELECT `restaurant_url` FROM (SELECT restaurants.restaurant_url, COUNT(*) AS n_review FROM restaurants INNER JOIN reviews ON restaurants.restaurant_url = reviews.restaurant_url GROUP BY restaurants.restaurant_url) as a WHERE `n_review` < %s;", (threshold,))
+        conn.commit()
+        result = cursor.fetchall()
+        rows = [x[0] for x in result]
+        conn.close()
+        return rows, len(rows)
+
+
+    @staticmethod
+    def get_all_reviews():
+        conn, cursor = db_connect()
+        cursor.execute("SELECT review_text FROM reviews LIMIT 10")
+        res = cursor.fetchall()
+        conn.close()
+        res = [x[0].decode("utf-8") for x in res]
+        return res
+
+
+    @staticmethod
+    def tokenize(reviews):
+        final_reviews = []
+
+        italian_stopwords = stopwords.words("italian")
+        tokenizer = RegexpTokenizer(r'\w+')
+        for review in reviews:
+            lower_review = review.lower()
+            filtered_sentence = tokenizer.tokenize(lower_review)
+            filtered_sentence = ' '.join(filtered_sentence)
+            word_tokens = word_tokenize(filtered_sentence)
+            filtered_sentence = [w for w in word_tokens if not w in italian_stopwords]
+            cleaned_review = ' '.join(filtered_sentence)
+            final_reviews.append(cleaned_review)
+        return final_reviews
+
+    @staticmethod
+    def wordcloud(reviews):
+        mask = np.array(Image.open(r'/home/smoxy/Documenti/py_projects/PyTripAdvisor/wine.png'))
+        wordcloud = WordCloud(
+            mask = mask,
+            background_color = 'white',
+            max_words = 2000,
+            max_font_size = 500,
+            random_state = 42,
+            contour_width=3, 
+            contour_color='firebrick',
+            width = mask.shape[1],
+            height = mask.shape[0]).generate(' '.join([i for i in reviews]))
+        plt.imshow(wordcloud, interpolation='bilinear') # image show
+        plt.axis('off') # to off the axis of x and y
+        plt.savefig('World_Cloud.png')
+        plt.show()
 
 if __name__ == "__main__":
     Bot = PyTripAdvisor()
@@ -455,17 +656,13 @@ if __name__ == "__main__":
     #Bot.search(driver)
     #Bot.start_page(driver,page_num=89)
     #Bot.getRestaurants(driver,page_num=0)
-    urls = Bot.restaurantUrls()
-    
-    #urls = urls[(urls.index("https://www.tripadvisor.it/Restaurant_Review-g187791-d6561736-Reviews-IL_Gusto_Restaurant_Wok-Rome_Lazio.html")-18):]
-    urls = ["https://www.tripadvisor.it/Restaurant_Review-g187791-d1727980-Reviews-Hostaria_da_Corrado-Rome_Lazio.html", "https://www.tripadvisor.it/Restaurant_Review-g187791-d967428-Reviews-Target-Rome_Lazio.html"]
+    #urls = Bot.restaurantUrls()
+    #urls = [f"{const.BASE_URL}/RestaurantSearch-g187791-oa{page_num*30}-a_date.2022__2D__06__2D__02-a_people.2-a_time.20%3A00%3A00-a_zur.2022__5F__06__5F__02-Rome_L.html#EATERY_LIST_CONTENTS" for page_num in range(100,378)]
     #drivers = [Bot.getDriver() for i in range(4)]
-    with ProcessPoolExecutor(max_workers=2) as executor:
-        result = [executor.map(Bot.getReviews, urls)]
+    #with ProcessPoolExecutor(max_workers=1) as executor:
+    #    result = [executor.map(Bot.getRestaurants, urls)]
 
     #Bot.getReviews(driver, urls)
-    """except Exception as er:
-        print(f"[!]\t{er.with_traceback()}")
-        #driver.close()
-        print("[i]\texits gracefully 2")
-        sys.exit()"""
+    #review_text = Bot.tokenize("Ho pranzato presso il Leggiadria Restaurant in compagnia di 5 amici.")
+    #Bot.wordcloud(review_text)
+    Bot.wordcloud(Bot.tokenize(Bot.get_all_reviews()))
