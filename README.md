@@ -6,7 +6,7 @@ presenta i nomi e le informazioni di 30 ristoranti su ogni pagina contenenti a l
 per foglio. Vogliamo studiare la distribuzione dei ristoranti sul territorio romano, tenendo conto
 di:
 * informazioni sui ristoranti
-* * url,
+  * url,
 * * nome del ristorante,
 * * totale recensioni,
 * * indirizzo del ristorante.
