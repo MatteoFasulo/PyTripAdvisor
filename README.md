@@ -45,7 +45,7 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 * user_exist -> SQL query per verificare la presenza di un utente già memorizzato nella base dati
 * restaurant_exist -> SQL query per verificare la presenza di un ristorante già memorizzato nella base dati
 * review_exist -> SQL query per verificare la presenza di un recensore già memorizzato nella base dati
-* getDriver -> Session del Chromedriver di `Selenium`con opzioni personalizzate
+* getDriver -> Session del Chromedriver di `Selenium` con opzioni personalizzate
 * getRestaurants -> Inserimento nel database di una pagina di ristoranti a partire dal link inserito
 * getReviews -> Inserimento nel database delle ultime 200 recensioni a partire dal link del ristorante
 * tokenize -> `NLTK` tokenizzazione del testo delle recensioni con rimozione di punteggiatura e stopwords
