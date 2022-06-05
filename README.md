@@ -6,18 +6,36 @@ presenta i nomi e le informazioni di 30 ristoranti su ogni pagina contenenti a l
 per foglio. Vogliamo studiare la distribuzione dei ristoranti sul territorio romano, tenendo conto
 di:
 * informazioni sui ristoranti
-  * url,
-  * nome del ristorante,
-  * totale recensioni,
-  * indirizzo del ristorante.
+  * link ristorante
+  * nome
+  * rating medio 
+  * totale recensioni
+  * fascia di prezzo
+  * tipo di cucina
+  * diete particolari
+  * indirizzo
+
 * informazioni sul recensore
-  * rating,
-  * data di visita,
-  * data della recensione,
-  * helpful,
-  * nome della recensione,
-  * citta di provenienza del recensore,
-  * device utilizzato per recensire.
+  * username
+  * link del profilo
+  * recensioni totali scritte
+  * livello del recensore
+  * data di registrazione
+  * località di residenza
+  * totale città recensite
+  * totale voti utili ricevuti
+
+* informazioni sulle recensioni
+  * link recensione
+  * link ristorante
+  * username del recensore
+  * titolo
+  * data della recensione
+  * data di visita del ristorante
+  * voto della recensione
+  * voti utili ricevuti
+  * dispositivo con cui è stata scritta la recensione
+  * testo della recensione
 
 ### Report
 La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/PyTripAdvisor_Report.pdf)
@@ -30,9 +48,8 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 * D
 
 ### Maps
-* M
-* N
-> **Tip:** bla bla bla bla bla bla
+* [Distribuzione dei ristoranti](https://matteofasulo.github.io/PyTripAdvisor/mappa.html)
+> **Tip:** E' possibile selezionare le singole fasce di prezzo (Cheap, Reasonable, Expensive) dal menù in alto a destra nella mappa
 
 ### Dataset
 - In folder...
