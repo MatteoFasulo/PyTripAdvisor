@@ -7,17 +7,17 @@ per foglio. Vogliamo studiare la distribuzione dei ristoranti sul territorio rom
 di:
 * informazioni sui ristoranti
   * url,
-* * nome del ristorante,
-* * totale recensioni,
-* * indirizzo del ristorante.
+  * nome del ristorante,
+  * totale recensioni,
+  * indirizzo del ristorante.
 * informazioni sul recensore
-* * rating,
-* * data di visita,
-* * data della recensione,
-* * helpful,
-* * nome della recensione,
-* * citta di provenienza del recensore,
-* * device utilizzato per recensire.
+  * rating,
+  * data di visita,
+  * data della recensione,
+  * helpful,
+  * nome della recensione,
+  * citta di provenienza del recensore,
+  * device utilizzato per recensire.
 
 ### Report
 La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/PyTripAdvisor_Report.pdf)
