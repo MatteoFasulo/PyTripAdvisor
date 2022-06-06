@@ -33,7 +33,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 import nltk
 from nltk.tokenize import word_tokenize, RegexpTokenizer
 from nltk.corpus import stopwords
-from wordcloud import WordCloud
+from wordcloud import WordCloud, ImageColorGenerator
+from scipy.ndimage import gaussian_gradient_magnitude
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
@@ -606,13 +607,35 @@ class PyTripAdvisor:
         conn.close()
         return rows
 
-
+    
     @staticmethod
-    def get_all_reviews():
-        conn, cursor = db_connect()
-        cursor.execute("SELECT review_text FROM reviews LIMIT 10")
-        res = cursor.fetchall()
-        conn.close()
+    def get_reviews(min: int = None, max: int = None):
+        if min != None and min > 1:
+            min = min-1
+        if min == None and max == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT review_text FROM reviews")
+            res = cursor.fetchall()
+            conn.close()
+
+        elif min == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review < %s);", (max,))
+            res = cursor.fetchall()
+            conn.close()
+            
+        elif max == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review > %s);", (min,))
+            res = cursor.fetchall()
+            conn.close()
+
+        else:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review > %s AND n_review < %s);", (min, max))
+            res = cursor.fetchall()
+            conn.close()
+
         res = [x[0].decode("utf-8") for x in res]
         return res
 
@@ -634,34 +657,75 @@ class PyTripAdvisor:
         return final_reviews
 
     @staticmethod
-    def wordcloud(reviews):
-        mask = np.array(Image.open(r'/home/smoxy/Documenti/py_projects/PyTripAdvisor/wine.png'))
-        wordcloud = WordCloud(
-            mask = mask,
-            background_color = 'white',
-            max_words = 2000,
-            max_font_size = 500,
-            random_state = 42,
-            contour_width=3, 
-            contour_color='firebrick',
-            width = mask.shape[1],
-            height = mask.shape[0]).generate(' '.join([i for i in reviews]))
-        plt.imshow(wordcloud, interpolation='bilinear') # image show
-        plt.axis('off') # to off the axis of x and y
-        plt.savefig('World_Cloud.png')
-        plt.show()
+    def wordcloud(reviews, max_words: int, border: bool, img_path, subsample: str = None, bg_color: str = None, mask: float = .18):
+        subsamples = {"small": 1, "medium": 2, "large": 3}
+ 
+        d = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+ 
+        try:
+            img_color = np.array(Image.open(os.path.join(d, f"{img_path}.jpg")))
+        except FileNotFoundError:
+            img_color = np.array(Image.open(os.path.join(d, f"{img_path}.png")))
+ 
+        if subsample:
+            img_color = img_color[::subsamples.get(subsample), ::subsamples.get(subsample)]
+ 
+        img_mask = img_color.copy()
+        img_mask[img_mask.sum(axis=2) == 0] = 255
+        edges = np.mean([gaussian_gradient_magnitude(img_color[:, :, i] / 255., 2) for i in range(3)], axis=0)
+        img_mask[edges > mask] = 255
+        if border:
+            wc = wordcloud = WordCloud(
+                mask = img_mask,
+                background_color = bg_color,
+                max_words = max_words,
+                max_font_size = 500,
+                random_state = 42,
+                contour_width=1, 
+                contour_color='black',
+                relative_scaling=0
+                ).generate(' '.join([i for i in reviews]))
+        else:
+            wc = wordcloud = WordCloud(
+                mask = img_mask,
+                background_color = bg_color,
+                max_words = max_words,
+                max_font_size = 40,
+                random_state = 42,
+                relative_scaling=0
+                ).generate(' '.join([i for i in reviews]))
+        image_colors = ImageColorGenerator(img_color)
+        wc.recolor(color_func=image_colors)
+        #plt.imshow(wordcloud, interpolation="bilinear") # image show
+        #plt.axis('off') # to off the axis of x and y
+        #plt.savefig(f'wc_{img_path}.png')
+        #plt.show()
+ 
+        return wc
+ 
 
 if __name__ == "__main__":
+    file = "food1"
     Bot = PyTripAdvisor()
     Bot.clear()
-    #Bot.user_exist('pippo')
-    #driver = Bot.getDriver()
-    #try:
+    food = Bot.wordcloud(Bot.tokenize(Bot.get_reviews()), border=False, img_path="food" ,max_words=1000, mask=0.28)
+    food.to_file(f'img{os.sep}food-b1.png')
+    #pizza = Bot.wordcloud(Bot.tokenize(Bot.get_reviews(max=51)), border=True, img_path="pizza" ,max_words=5000, mask=0.18, bg_color='white')
+    #pizza.to_file(f'img{os.sep}pizza-b.png')
+    #burger = Bot.wordcloud(Bot.tokenize(Bot.get_reviews(min=51, max=1000)), border=False, img_path="burger" ,max_words=5000, mask=0.18)
+    #burger.to_file(f'img{os.sep}burger-b.png')
+    #salad = Bot.wordcloud(Bot.tokenize(Bot.get_reviews(min=1000)), border=False, img_path="salad" ,max_words=2000)
+    #salad.to_file(f'img{os.sep}salad-1.png')
+    #fruit = Bot.wordcloud(Bot.tokenize(Bot.get_reviews(min=1000)), border=True, img_path="fruit1" ,max_words=2000, mask=0.18)
+    #fruit.to_file(f'img{os.sep}fruit3.png')
+    #fruit = Bot.wordcloud(Bot.tokenize(Bot.get_reviews(min=1000)), border=False, img_path="fruit1" ,max_words=2000, mask=0.28)
+    #fruit.to_file(f'img{os.sep}fruit3.png')
+
     #Bot.search(driver)
     #Bot.start_page(driver,page_num=89)
     #Bot.getRestaurants(driver,page_num=0)
     #urls = Bot.restaurantUrls()
-    urls = Bot.not_reviewed_restaurant() #7404
+    #urls = Bot.not_reviewed_restaurant() #7404
 
     # 7236 13:52
     # 7000 14:12
@@ -675,8 +739,8 @@ if __name__ == "__main__":
 
     # SELECT COUNT(*) FROM (SELECT restaurants.restaurant_url FROM restaurants WHERE restaurants.restaurant_url NOT IN (SELECT reviews.restaurant_url FROM reviews)) as B
 
-    with ProcessPoolExecutor(max_workers=12) as executor:
-        result = [executor.map(Bot.getReviews, urls)]
+    #with ProcessPoolExecutor(max_workers=12) as executor:
+    #    result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
     #review_text = Bot.tokenize("Ho pranzato presso il Leggiadria Restaurant in compagnia di 5 amici.")
