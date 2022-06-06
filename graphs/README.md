@@ -32,3 +32,10 @@ L'analisi prosegue con lo studio dei diversi tipi di cucina di ogni ristorante d
 * La cucina giapponese non è molto apprezzata
 * Un'altissima percentuale di ristoranti ha come tipologia di cucina la pizza ma questa non rappresenta la categoria maggiormente apprezzata
 * I ristoranti di **pesce** hanno in media un rating più elevato rispetto a qualunque altra categoria di cucina seguita da quella **mediterranea**
+
+## [Diet Types](https://matteofasulo.github.io/PyTripAdvisor/graphs/diet_types.html)
+Durante la fase di scraping abbiamo preso anche l'informazione sulle diete particolari come:
+* Ristoranti con opzioni vegetariane
+* Ristoranti con opzioni vegane
+* Ristoranti gluten-free
+I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particolari stratificati per municipio. Possiamo vedere come il [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I) sia sempre in cima per percentuale di ristoranti con diete particolari mentre il [Municipio VI](https://it.wikipedia.org/wiki/Municipio_Roma_VI) è sempre posizionato tra gli ultimi posti.
