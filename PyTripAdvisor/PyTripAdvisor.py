@@ -155,10 +155,10 @@ def map_maker(output_filename = 'mappa'):
 f"""
 <table width="200" height="150" align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
-		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center"> <b> {restaurant['properties']['name']} </b> </div> </td>
 	</tr>
 	<tr>
-		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali <b> {restaurant['properties']['total_reviews']} </b> </div> </td> 
 	</tr>
 	<tr>
 		<td style="border-radius: 10px"> <div align="center">&#8364;</div> </td>
@@ -181,10 +181,10 @@ height=185)),
 f"""
 <table width="200" height="150"  align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
-		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center"> <b> {restaurant['properties']['name']} </b> </div> </td>
 	</tr>
 	<tr>
-		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali <b> {restaurant['properties']['total_reviews']} </b> </div> </td> 
 	</tr>
 	<tr>
 		<td style="border-radius: 10px"> <div align="center">&#8364;&#8364; - &#8364;&#8364;&#8364;</div> </td>
@@ -207,10 +207,10 @@ height=185)),
 f"""
 <table width="200" height="150" align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
-		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center"> <b> {restaurant['properties']['name']} </b> </div> </td>
 	</tr>
 	<tr>
-		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali <b> {restaurant['properties']['total_reviews']} </b> </div> </td> 
 	</tr>
 	<tr>
 		<td style="border-radius: 10px"> <div align="center">&#8364;&#8364;&#8364;&#8364;</div> </td>
