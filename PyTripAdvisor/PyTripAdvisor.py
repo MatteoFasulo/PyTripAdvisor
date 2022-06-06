@@ -153,7 +153,7 @@ def map_maker(output_filename = 'mappa'):
                     popup=Popup(
                         IFrame(
 f"""
-<table width="150" height="100" align="center" border-color: "#96D4D4" border-radius = " 10px" >
+<table width="200" height="150" align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
 		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
 	</tr>
@@ -179,7 +179,7 @@ height=185)),
                     popup=Popup(
                         IFrame(
 f"""
-<table width="200" height="100"  align="center" border-color: "#96D4D4" border-radius = " 10px" >
+<table width="200" height="150"  align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
 		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
 	</tr>
