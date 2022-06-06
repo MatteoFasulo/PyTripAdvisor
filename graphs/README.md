@@ -38,6 +38,7 @@ Durante la fase di scraping abbiamo preso anche l'informazione sulle diete parti
 * Ristoranti con opzioni vegetariane
 * Ristoranti con opzioni vegane
 * Ristoranti gluten-free
+
 I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particolari stratificati per municipio. Possiamo vedere come il [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I) sia sempre in cima per percentuale di ristoranti con diete particolari mentre il [Municipio VI](https://it.wikipedia.org/wiki/Municipio_Roma_VI) è sempre posizionato tra gli ultimi posti.
 
 ## Conclusioni
