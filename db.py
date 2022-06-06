@@ -5,6 +5,7 @@ import os
 
 import constants as const
 
+# Database Structure and Config
 
 def query_unpack(query_result: list, key: str = None, unique: bool = False):
     final = []
@@ -17,8 +18,8 @@ def query_unpack(query_result: list, key: str = None, unique: bool = False):
 
 def db_connect():
     try:
-        conn = mysql.connector.connect(host="127.0.0.1", user="root", password="NQIDWqGCF6n4P1vb")
-        #print("[SQL] Connected")
+        conn = mysql.connector.connect(host="54.37.156.91", user="root", password="NQIDWqGCF6n4P1vb")
+        print("[SQL] Connected")
         cursor = conn.cursor(buffered=True, dictionary=True)
         #print("[SQL] Cursor setup")
         cursor.execute("SHOW DATABASES")
@@ -33,8 +34,6 @@ def db_connect():
                 restaurant_rating float,
                 restaurant_total_reviews INTEGER,
                 restaurant_price float,
-                cuisine varchar(255),
-                diet VARCHAR(255),
                 address varchar(255)
             )""")
             conn.commit()
@@ -63,7 +62,7 @@ def db_connect():
                 review_text varchar(255) NOT NULL
             )""")
             conn.commit()
-            #print(f"[SQL] {const.DB_NAME} database created")
+            print(f"[SQL] {const.DB_NAME} database created")
 
         #print(f"[SQL] {const.DB_NAME} database found")
         cursor.execute(f"USE {const.DB_NAME}")
@@ -76,25 +75,3 @@ def db_connect():
     except (mysql.connector.errors.InterfaceError, socket.gaierror) as err:
         print(f"[!] Got an exception, check your syntax --> {err}")
         return False
-
-##########################################################
-
-# SELECT restaurants.restaurant_url, COUNT(*) AS n_review
-# FROM restaurants
-# INNER JOIN reviews
-# ON restaurants.restaurant_url = reviews.restaurant_url
-# GROUP BY restaurants.restaurant_url
-# ORDER BY n_review DESC;
-
-##########################################################
-
-##########################################################
-
-# SELECT restaurants.restaurant_url, COUNT(*) AS n_review
-# FROM restaurants
-# INNER JOIN reviews
-# ON restaurants.restaurant_url = reviews.restaurant_url
-# GROUP BY restaurants.restaurant_url
-# ORDER BY n_review DESC
-
-##########################################################
