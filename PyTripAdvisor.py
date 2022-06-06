@@ -118,17 +118,17 @@ class PyTripAdvisor:
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--disable-gpu')
         chrome_prefs = {}
-        chrome_options.add_experimental_option( "prefs",{'profile.managed_default_content_settings.javascript': 2})
-        #chrome_prefs["profile.default_content_settings"] = {"images": 2}
-        #chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
-        #chrome_options.add_experimental_option('prefs', chrome_prefs)
+        #chrome_options.add_experimental_option( "prefs",{'profile.managed_default_content_settings.javascript': 2})
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+        chrome_options.add_experimental_option('prefs', chrome_prefs)
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--incognito")
         #chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36')
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         
         sleep(self.small_sleep)
-        print("[i]\tDriver Accepted")
+        #print("[i]\tDriver Accepted")
         return driver
 
     def search(self, driver):
@@ -138,7 +138,7 @@ class PyTripAdvisor:
         sleep(self.small_sleep)
         driver.find_elements(By.XPATH, "//div[@class='dyTIx eMorU elMNN gayuF dWGsc ecxqv']")[3].click()
         sleep(1)
-        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//form[@class='bmTdH o']//input[@title='Cerca']")))
+        element = WebDriverWait(driver, 120).until(EC.presence_of_element_located((By.XPATH, "//form[@class='bmTdH o']//input[@title='Cerca']")))
         actionChains = ActionChains(driver)
         actionChains.move_to_element(element).click().perform()
         sleep(.5)
@@ -362,24 +362,21 @@ class PyTripAdvisor:
     def getReviews(self, restaurant_url):
         driver = self.getDriver()
         driver.get(restaurant_url)
-        #sleep(self.small_sleep)
-        sleep(3)
         start = time.perf_counter()
         try:
             try:
-                driver.find_element(By.XPATH, "//button[text()='Accetto']").click()     #Accetta i cookie
-                sleep(1)
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Accetto']"))).click()     #Accetta i cookie
             except Exception as e:
                 pass
 
-            try: 
-                restaurant_address = driver.find_element(By.XPATH, "//span[@class='brMTW']").text
-            except Exception as e:
-                restaurant_address = None
+            #try: 
+            #    restaurant_address = driver.find_element(By.XPATH, "//span[@class='brMTW']").text
+            #except Exception as e:
+            #    restaurant_address = None
 
-            conn, cursor = db_connect()
-            cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
-            conn.commit()
+            #conn, cursor = db_connect()
+            #cursor.execute("UPDATE restaurants SET address=%s WHERE restaurant_url=%s", (restaurant_address,restaurant_url))
+            #conn.commit()
 
             try:
                 total_reviews = driver.find_element(By.XPATH, "//span[@class='count']").text
@@ -392,18 +389,17 @@ class PyTripAdvisor:
                 total_reviews = 0
 
             pages = int(total_reviews / 10)
-            if pages > 20: 
-                pages = 20 # max 200 per restaurant
+            if pages > 1: 
+                pages = 1 # max 200 per restaurant
+            pages = pages+1
 
-            if pages < 11:
-                driver.quit()
-                return
-
-            for page in range(0,pages):
+            #if pages < 11:
+            #    driver.quit()
+            #    return
+            for page in range(1,pages+1):
                 print(f"[i] Getting page {page} / {pages}")
                 try:
-                    WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='taLnk ulBlueLinks']"))).click()
-                    sleep(1)
+                    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='taLnk ulBlueLinks']"))).click()
                 except Exception as e:
                     pass
                 
@@ -464,18 +460,18 @@ class PyTripAdvisor:
                     member_info = container[i].find_element(By.XPATH, ".//div[@class='member_info']")
                     username = member_info.find_element(By.XPATH, ".//div[@class='info_text pointer_cursor']/div").text
                     if self.user_exist(username):
-                        stop = time.perf_counter()
-                        print(f"[i] page n°{page} took {stop - start:0.4f} seconds")
+                        #stop = time.perf_counter()
+                        #print(f"[i] page n°{page} took {stop - start:0.4f} seconds")
                         continue
                     
 
                     actions.move_to_element(container[i].find_element(By.XPATH, ".//span[@class='noQuotes']")).perform()
                     
-                    avatar = WebDriverWait(container[i], 10).until(EC.element_to_be_clickable((By.XPATH, ".//div[contains(@class, 'ui_avatar resp')]")))
+                    avatar = WebDriverWait(container[i], 120).until(EC.element_to_be_clickable((By.XPATH, ".//div[contains(@class, 'ui_avatar resp')]")))
                     avatar.click()
-                    sleep(0.75)
+                    sleep(0.5)
                     
-                    reviewer_box = WebDriverWait(container[i], 10).until(EC.visibility_of_element_located((By.XPATH, "//div[contains(@class, 'memberOverlayRedesign g10n')]/a")))
+                    reviewer_box = WebDriverWait(container[i], 120).until(EC.visibility_of_element_located((By.XPATH, "//div[contains(@class, 'memberOverlayRedesign g10n')]/a")))
                     
                     reviewer_name = reviewer_box.get_attribute('href').split(sep="/")[-1]
 
@@ -561,11 +557,9 @@ class PyTripAdvisor:
                         conn.commit()
                         conn.close()
 
-                    WebDriverWait(driver, 10).until(
+                    WebDriverWait(driver, 120).until(
                         EC.element_to_be_clickable((By.XPATH, "//span[@class='ui_overlay ui_popover arrow_left ']/div[@class='ui_close_x']"))
                         ).click()
-
-                    sleep(.5)
 
                 stop = time.perf_counter()
                 print(f"[i] page n°{page} took {stop - start:0.4f} seconds;\t reviews skipped = {skipped}")
@@ -577,18 +571,18 @@ class PyTripAdvisor:
                     sleep(.75)
                     next.click()
                 except Exception as e:
-                    print(e.with_traceback())
+                    #tb = sys.exc_info()[2]
+                    #print(e.with_traceback(tb))
                     break
-                sleep(.5)
-        
-            conn.close()
-        except Exception as er:
+                
+
+            try:
+                conn.close()
+            except UnboundLocalError:
+                pass
+        except Exception as e:
             print("[i]\texits gracefully")
-            print(f"[!]\t{er.with_traceback()}")
-            #urls_err.append(restaurant_url)
-            driver.quit()
             #sys.exit()
-            return restaurant_url
         driver.quit()
         return
 
@@ -601,6 +595,16 @@ class PyTripAdvisor:
         rows = [x[0] for x in result]
         conn.close()
         return rows, len(rows)
+    
+    @staticmethod
+    def not_reviewed_restaurant():
+        conn, cursor = db_connect()
+        cursor.execute("SELECT restaurants.restaurant_url FROM restaurants WHERE restaurants.restaurant_url NOT IN (SELECT reviews.restaurant_url FROM reviews)")
+        conn.commit()
+        result = cursor.fetchall()
+        rows = [x[0] for x in result]
+        conn.close()
+        return rows
 
 
     @staticmethod
@@ -657,12 +661,24 @@ if __name__ == "__main__":
     #Bot.start_page(driver,page_num=89)
     #Bot.getRestaurants(driver,page_num=0)
     #urls = Bot.restaurantUrls()
-    #urls = [f"{const.BASE_URL}/RestaurantSearch-g187791-oa{page_num*30}-a_date.2022__2D__06__2D__02-a_people.2-a_time.20%3A00%3A00-a_zur.2022__5F__06__5F__02-Rome_L.html#EATERY_LIST_CONTENTS" for page_num in range(100,378)]
-    #drivers = [Bot.getDriver() for i in range(4)]
-    #with ProcessPoolExecutor(max_workers=1) as executor:
-    #    result = [executor.map(Bot.getRestaurants, urls)]
+    urls = Bot.not_reviewed_restaurant() #7404
+
+    # 7236 13:52
+    # 7000 14:12
+    # 6687 14:52
+    # 6634 15:09
+    # 6454 15:30
+    # 5061 19:07
+    # 4143 21:30
+    # 3411 00:30
+
+
+    # SELECT COUNT(*) FROM (SELECT restaurants.restaurant_url FROM restaurants WHERE restaurants.restaurant_url NOT IN (SELECT reviews.restaurant_url FROM reviews)) as B
+
+    with ProcessPoolExecutor(max_workers=12) as executor:
+        result = [executor.map(Bot.getReviews, urls)]
 
     #Bot.getReviews(driver, urls)
     #review_text = Bot.tokenize("Ho pranzato presso il Leggiadria Restaurant in compagnia di 5 amici.")
     #Bot.wordcloud(review_text)
-    Bot.wordcloud(Bot.tokenize(Bot.get_all_reviews()))
+    #Bot.wordcloud(Bot.tokenize(Bot.get_all_reviews()))
