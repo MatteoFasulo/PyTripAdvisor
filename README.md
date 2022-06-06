@@ -42,18 +42,22 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 
 ### PyTripAdvisor Class
 `PyTripAdvisor`:
-* A
-* B
-* C
-* D
+* user_exist -> SQL query per verificare la presenza di un utente già memorizzato nella base dati
+* restaurant_exist -> SQL query per verificare la presenza di un ristorante già memorizzato nella base dati
+* review_exist -> SQL query per verificare la presenza di un recensore già memorizzato nella base dati
+* getDriver -> Session del Chromedriver di `Selenium` con opzioni personalizzate
+* getRestaurants -> Inserimento nel database di una pagina di ristoranti a partire dal link inserito
+* getReviews -> Inserimento nel database delle ultime 200 recensioni a partire dal link del ristorante
+* tokenize -> `NLTK` tokenizzazione del testo delle recensioni con rimozione di punteggiatura e stopwords
+* wordcloud -> Rappresentazione grafica delle parole più frequenti con diverse maschere
 
 ### Maps
 * [Distribuzione dei ristoranti](https://matteofasulo.github.io/PyTripAdvisor/mappa.html)
 > **Tip:** E' possibile selezionare le singole fasce di prezzo (Cheap, Reasonable, Expensive) dal menù in alto a destra nella mappa
 
 ### Dataset
-- In folder...
-> **Error:** Bruh
+- Il dataset è memorizzato nel database SQL 'ristoranti_sql.gz' compressa in *gzip*
+> **Ripristino (MySQL):** gunzip < 'ristoranti_sql.gz' | mysql -u [user] -p[pass]
 
 
 ### Libraries
