@@ -155,14 +155,15 @@ def map_maker(output_filename = 'mappa'):
 f"""
 <table width="200" height="150" align="center" border-color: "#96D4D4" border-radius = " 10px" >
 	<tr>
-		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center"> <b> {restaurant['properties']['name']} </b> </div> </td>
+		<td colspan="3" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center"> <b> {restaurant['properties']['name']} </b> </div> </td>
 	</tr>
 	<tr>
-		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali <b> {restaurant['properties']['total_reviews']} </b> </div> </td> 
+		<td colspan="3" style="border-radius: 10px"> <div align="center">Recensioni totali <b> {restaurant['properties']['total_reviews']} </b> </div> </td> 
 	</tr>
 	<tr>
-		<td style="border-radius: 10px"> <div align="center">&#8364;</div> </td>
-		<td style="border-radius: 10px"> <div align="center">{restaurant['properties']['rating']} &#9733;</div> </td>
+		<td width = "70" style="border-radius: 10px"> <div align="right">&#8364;</div> </td>
+		<td width = "50" style="border-radius: 10px">  </td>
+		<td width = "80" style="border-radius: 10px"> <div align="left">{restaurant['properties']['rating']} &#9733;</div> </td>
 	</tr>
 </table>
 """,
