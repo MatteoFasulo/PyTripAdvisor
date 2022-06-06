@@ -18,7 +18,7 @@ def query_unpack(query_result: list, key: str = None, unique: bool = False):
 
 def db_connect():
     try:
-        conn = mysql.connector.connect(host="54.37.156.91", user="root", password="NQIDWqGCF6n4P1vb")
+        conn = mysql.connector.connect(host="#.#.#.#", user="...", password=".........")
         print("[SQL] Connected")
         cursor = conn.cursor(buffered=True, dictionary=True)
         #print("[SQL] Cursor setup")
