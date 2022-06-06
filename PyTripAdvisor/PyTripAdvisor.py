@@ -4,6 +4,16 @@ import time
 import datetime as dt
 import locale
 import re
+import json
+from math import sqrt, log
+import pandas as pd
+import geopandas as gp
+
+import folium
+from folium import *
+from folium import plugins
+
+from OSMPythonTools.nominatim import Nominatim
 
 import numpy as np
 from scipy.ndimage import gaussian_gradient_magnitude
@@ -37,6 +47,232 @@ from db import db_connect
 
 ############################################################################################
 locale.setlocale(locale.LC_TIME, "it_IT")       #in linux use this: "it_IT.UTF-8"
+
+def restaurantAddresses(conn, cursor):
+        cursor.execute("SELECT restaurant_url,restaurant_name,restaurant_rating,restaurant_total_reviews,restaurant_price,address FROM restaurants")
+        rows = cursor.fetchall()
+        url,name,rating,total_reviews,price,address = list(map(list, zip(*rows)))
+        conn.commit()
+        return url,name,rating,total_reviews,price,address
+
+def sqlToGeoJSON():
+    conn, cursor = db_connect()
+    url,name,rating,total_reviews,price,address = restaurantAddresses(conn, cursor)
+    conn.close()
+    nominatim = Nominatim()
+    results = [nominatim.query(indirizzo).toJSON()[0] if len(nominatim.query(indirizzo).toJSON()) > 0 else None for indirizzo in address]
+
+    with open('points.geojson', 'w', encoding='utf8') as file:
+        geojson = {
+        "type": "FeatureCollection",
+        "features": []
+        }
+
+        for index, result in enumerate(results):
+            if result is not None:
+                json_point = {
+                    "type": "Feature",
+                    "properties": {
+                        "url" : url[index],
+                        "place_id" : result.get('place_id'),
+                        "osm_id" : result.get('osm_id'),
+                        "name" : name[index],
+                        "rating" : rating[index],
+                        "total_reviews" : total_reviews[index],
+                        "price" : price[index]
+                    },
+                    "geometry" : {
+                        "type" : "Point",
+                        "coordinates": [
+                            float(result.get('lon')),
+                            float(result.get('lat'))
+                        ]
+                    }
+                }
+                geojson.get('features').append(json_point)
+
+        json.dump(geojson, file, indent=4)
+
+
+def map_maker(output_filename = 'mappa'):
+    m = Map(location=[41.9028, 12.4964], 
+                tiles="CartoDB positron", 
+                zoom_start=9,
+                zoom_control=True, 
+                prefer_canvas=False)
+
+    layers = ['Expensive','Reasonable','Cheap']
+
+    fmtr = "function(num) {return L.Util.formatNum(num, 3) + ' º ';};"
+    plugins.MousePosition(position='topright', separator=' | ', prefix="Mouse:", lng_formatter=fmtr, lat_formatter=fmtr).add_to(m)
+
+    plugins.Geocoder(collapsed=False, position='topright', add_marker=True).add_to(m)
+
+    plugins.Draw(
+        export=True,
+        filename='my_data.geojson',
+        position='topleft',
+        draw_options={'polyline': {'allowIntersection': False}},
+        edit_options={'poly': {'allowIntersection': False}}
+    ).add_to(m)
+
+    fg = FeatureGroup(control=False, show=False)
+    m.add_child(fg)
+
+    f1 = plugins.FeatureGroupSubGroup(fg, layers[0].capitalize())
+    m.add_child(f1)
+
+    f2 = plugins.FeatureGroupSubGroup(fg, layers[1].capitalize())
+    m.add_child(f2)
+
+    f3 = plugins.FeatureGroupSubGroup(fg, layers[2].capitalize())
+    m.add_child(f3)
+
+    rating_colors = {
+        '1.0' : '#B30000',
+        '1.5' : '#B30000',
+        '2.0' : '#B30000',
+        '2.5' : '#B30000',
+        '3.0' : '#B30000',
+        '3.5' : '#B30000',
+        '4.0' : '#774400',
+        '4.5' : '#3C8800',
+        '5.0' : '#00CC00',
+        }
+
+    with open('points.geojson','r',encoding="utf-8") as file:
+        restaurants = json.load(file).get('features')
+
+        for restaurant in restaurants:
+            if restaurant['properties']['total_reviews'] < 90:
+                continue
+            if float(restaurant['properties']['price']) == 1.0:
+                Circle(
+                    location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
+                    radius=log(restaurant['properties']['total_reviews']),
+                    popup=Popup(
+                        IFrame(
+f"""
+<table width="150" height="100" align="center" border-color: "#96D4D4" border-radius = " 10px" >
+	<tr>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+	</tr>
+	<tr>
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+	</tr>
+	<tr>
+		<td style="border-radius: 10px"> <div align="center">&#8364;</div> </td>
+		<td style="border-radius: 10px"> <div align="center">{restaurant['properties']['rating']} &#9733;</div> </td>
+	</tr>
+</table>
+""",
+width=240,
+height=185)),
+                    tooltip=restaurant['properties']['name'],
+                    color=rating_colors.get(str(restaurant['properties']['rating'])),
+                    fill=True,
+                    ).add_to(f3)
+            elif float(restaurant['properties']['price']) == 2.5:
+                Circle(
+                    location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
+                    radius=sqrt(restaurant['properties']['total_reviews']),
+                    popup=Popup(
+                        IFrame(
+f"""
+<table width="200" height="100"  align="center" border-color: "#96D4D4" border-radius = " 10px" >
+	<tr>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+	</tr>
+	<tr>
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+	</tr>
+	<tr>
+		<td style="border-radius: 10px"> <div align="center">&#8364;&#8364; - &#8364;&#8364;&#8364;</div> </td>
+		<td style="border-radius: 10px"> <div align="center">{restaurant['properties']['rating']} &#9733;</div> </td>
+	</tr>
+</table>
+""",
+width=240,
+height=185)),
+                    tooltip=restaurant['properties']['name'],
+                    color=rating_colors.get(str(restaurant['properties']['rating'])),
+                    fill=True,
+                    ).add_to(f2)
+            elif float(restaurant['properties']['price']) == 4:
+                Circle(
+                    location=(restaurant['geometry']['coordinates'][1],restaurant['geometry']['coordinates'][0]),
+                    radius=sqrt(restaurant['properties']['total_reviews']),
+                    popup=Popup(
+                        IFrame(
+f"""
+<table width="200" height="150" align="center" border-color: "#96D4D4" border-radius = " 10px" >
+	<tr>
+		<td colspan="2" style="background-color: #bfbfbf; border-radius: 20px"> <div align="center">{restaurant['properties']['name']}</div> </td>
+	</tr>
+	<tr>
+		<td colspan="2" style="border-radius: 10px"> <div align="center">Recensioni totali {restaurant['properties']['total_reviews']}</div> </td> 
+	</tr>
+	<tr>
+		<td style="border-radius: 10px"> <div align="center">&#8364;&#8364;&#8364;&#8364;</div> </td>
+		<td style="border-radius: 10px"> <div align="center">{restaurant['properties']['rating']} &#9733;</div> </td>
+	</tr>
+</table>
+""",
+width=240,
+height=185)),
+                    tooltip=restaurant['properties']['name'],
+                    color=rating_colors.get(str(restaurant['properties']['rating'])),
+                    fill=True,
+                    ).add_to(f1)
+
+    plugins.LocateControl().add_to(m)
+    plugins.MiniMap(position='bottomright').add_to(m)
+    
+    
+    plugins.Fullscreen(position='topleft', title='Full Screen', title_cancel='Exit Full Screen', force_separate_button=True).add_to(m)
+    plugins.MeasureControl(position='bottomleft', primary_length_unit='kilometers', secondary_length_unit='meters').add_to(m)
+
+    TileLayer('Stamen Terrain').add_to(m)
+    TileLayer('Stamen Toner').add_to(m)
+    TileLayer('Stamen Water Color').add_to(m)
+    TileLayer('cartodbpositron').add_to(m)
+    TileLayer('cartodbdark_matter').add_to(m)
+
+    LayerControl().add_to(m)
+    m.save(f'{output_filename}.html')
+
+def merge_municipi(filename='municipi.geojson'):
+    df = gp.read_file("points.geojson")
+    municipi = gp.read_file(filename)
+    points_within = gp.sjoin(df, municipi, op="within")
+    points_within.to_csv("ristoranti_zone.csv")
+
+def get_cuisines_diets(restaurant_url):
+    conn, cursor = db_connect()
+    cursor.execute("SELECT cuisine, diet FROM restaurants WHERE restaurant_url = %s", (restaurant_url,))
+    rows = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    if len(rows) != 0:
+        try:
+            cuisines = rows[0][0]
+        except:
+            cuisines = None
+        try:
+            diets = rows[0][1]
+        except:
+            diets = None
+        return cuisines, diets
+    else:
+        return None, None
+
+def restaurants_with_cuisine(filename='ristoranti_zone.csv'):
+    df = pd.read_csv(filename, encoding='utf-8')
+    df[['cuisines','diets']] = df.apply(lambda x: get_cuisines_diets(x.name), axis=1, result_type='expand')
+    new_df = df
+    new_df.to_csv("ristoranti_zone_cucine.csv", encoding="utf-8")
+    return
+
 
 class PyTripAdvisor:
     def __init__(
@@ -384,9 +620,6 @@ class PyTripAdvisor:
                 pages = 1 # max 200 per restaurant
             pages = pages+1
 
-            #if pages < 11:
-            #    driver.quit()
-            #    return
             for page in range(1,pages+1):
                 print(f"[i] Getting page {page} / {pages}")
                 try:
@@ -562,8 +795,6 @@ class PyTripAdvisor:
                     sleep(.75)
                     next.click()
                 except Exception as e:
-                    #tb = sys.exc_info()[2]
-                    #print(e.with_traceback(tb))
                     break
                 
 
@@ -573,7 +804,6 @@ class PyTripAdvisor:
                 pass
         except Exception as e:
             print("[i]\texits gracefully")
-            #sys.exit()
         driver.quit()
         return
 
@@ -599,13 +829,34 @@ class PyTripAdvisor:
 
 
     @staticmethod
-    def get_all_reviews():
-        conn, cursor = db_connect()
-        cursor.execute("SELECT review_text FROM reviews")
-        res = cursor.fetchall()
-        conn.close()
+    def get_reviews(min: int = None, max: int = None):
+        if min != None and min > 1:
+            min = min-1
+        if min == None and max == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT review_text FROM reviews")
+            res = cursor.fetchall()
+            conn.close()
+
+        elif min == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review < %s);", (max,))
+            res = cursor.fetchall()
+            conn.close()
+            
+        elif max == None:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review > %s);", (min,))
+            res = cursor.fetchall()
+            conn.close()
+
+        else:
+            conn, cursor = db_connect()
+            cursor.execute("SELECT `review_text` FROM `reviews` WHERE `reviews`.`restaurant_url` IN (SELECT `restaurant_url` FROM (SELECT `restaurant_url`, `restaurant_total_reviews` as n_review FROM `restaurants` GROUP BY `restaurant_url`) AS B WHERE n_review > %s AND n_review < %s);", (min, max))
+            res = cursor.fetchall()
+            conn.close()
+
         res = [x[0].decode("utf-8") for x in res]
-        print("[SQL] Sending result...")
         return res
 
 
@@ -623,31 +874,30 @@ class PyTripAdvisor:
             filtered_sentence = [w for w in word_tokens if not w in italian_stopwords]
             cleaned_review = ' '.join(filtered_sentence)
             final_reviews.append(cleaned_review)
-        print("[NLTK] Finished preprocessing...")
         return final_reviews
 
     @staticmethod
-    def wordcloud(reviews, max_words: int, border: bool, img_path, subsample: str = None):
+    def wordcloud(reviews, max_words: int, border: bool, img_path, subsample: str = None, bg_color: str = None, mask: float = .18):
         subsamples = {"small": 1, "medium": 2, "large": 3}
-
+ 
         d = os.path.dirname(__file__) if "__file__" in locals() else os.getcwd()
-
+ 
         try:
             img_color = np.array(Image.open(os.path.join(d, f"{img_path}.jpg")))
         except FileNotFoundError:
             img_color = np.array(Image.open(os.path.join(d, f"{img_path}.png")))
-
+ 
         if subsample:
             img_color = img_color[::subsamples.get(subsample), ::subsamples.get(subsample)]
-
+ 
         img_mask = img_color.copy()
         img_mask[img_mask.sum(axis=2) == 0] = 255
         edges = np.mean([gaussian_gradient_magnitude(img_color[:, :, i] / 255., 2) for i in range(3)], axis=0)
-        img_mask[edges > .08] = 255
+        img_mask[edges > mask] = 255
         if border:
-            wc = wordcloud = WordCloud(
+            wc = WordCloud(
                 mask = img_mask,
-                background_color = 'black',
+                background_color = bg_color,
                 max_words = max_words,
                 max_font_size = 500,
                 random_state = 42,
@@ -656,9 +906,9 @@ class PyTripAdvisor:
                 relative_scaling=0
                 ).generate(' '.join([i for i in reviews]))
         else:
-            wc = wordcloud = WordCloud(
+            wc = WordCloud(
                 mask = img_mask,
-                background_color = 'black',
+                background_color = bg_color,
                 max_words = max_words,
                 max_font_size = 40,
                 random_state = 42,
@@ -666,60 +916,15 @@ class PyTripAdvisor:
                 ).generate(' '.join([i for i in reviews]))
         image_colors = ImageColorGenerator(img_color)
         wc.recolor(color_func=image_colors)
-        plt.imshow(wordcloud, interpolation="bilinear") # image show
-        plt.axis('off') # to off the axis of x and y
         plt.savefig(f'wc_{img_path}.png')
-        plt.show()
+        return wc
 
 if __name__ == "__main__":
-    from collections import Counter
-    import pandas as pd
-    import plotly.express as px
     Bot = PyTripAdvisor()
     Bot.clear()
-    final_count_dict = {}
-    recensioni = Bot.get_all_reviews()
-    recensioni_pulite = Bot.tokenize(recensioni)
-    for recensione in recensioni_pulite:
-        recensione_lista_parole = recensione.split(" ")
-        recensione_dict_count = Counter(recensione_lista_parole)
-        final_count_dict = mergeDictionary(final_count_dict, recensione_dict_count)
-
-    d = {k: v for k, v in sorted(final_count_dict.items(), key=lambda item: item[1], reverse=True)}
-    df = pd.DataFrame({x:[y] for x,y in d.items()}).T
-    df = df.iloc[:20]
-    df.plot(kind='bar')
-    plt.show()
-    #fig = px.histogram(df, x="")
-    #fig.show()
-
-    
-
-    #Bot.user_exist('pippo')
-    #driver = Bot.getDriver()
-    #try:
-    #Bot.search(driver)
-    #Bot.start_page(driver,page_num=89)
-    #Bot.getRestaurants(driver,page_num=0)
-    #urls = Bot.restaurantUrls()
-    #urls = Bot.not_reviewed_restaurant() #7404
-
-    # 7236 13:52
-    # 7000 14:12
-    # 6687 14:52
-    # 6634 15:09
-    # 6454 15:30
-    # 5061 19:07
-    # 4143 21:30
-    # 3411 00:30
-
-
-    # SELECT COUNT(*) FROM (SELECT restaurants.restaurant_url FROM restaurants WHERE restaurants.restaurant_url NOT IN (SELECT reviews.restaurant_url FROM reviews)) as B
+    driver = Bot.getDriver()
+    Bot.search(driver)
+    Bot.getRestaurants(driver,page_num=0)
 
     #with ProcessPoolExecutor(max_workers=12) as executor:
     #    result = [executor.map(Bot.getReviews, urls)]
-
-    #Bot.getReviews(driver, urls)
-    #review_text = Bot.tokenize("Ho pranzato presso il Leggiadria Restaurant in compagnia di 5 amici.")
-    #Bot.wordcloud(review_text)
-    #Bot.wordcloud(Bot.tokenize(Bot.get_all_reviews()))
