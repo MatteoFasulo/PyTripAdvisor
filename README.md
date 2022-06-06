@@ -52,7 +52,7 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 * wordcloud -> Rappresentazione grafica delle parole più frequenti con diverse maschere
 
 ### Maps
-* [Distribuzione dei ristoranti](https://matteofasulo.github.io/PyTripAdvisor/mappa.html)
+* [Distribuzione dei ristoranti](https://matteofasulo.github.io/PyTripAdvisor/map/mappa.html)
 > **Tip:** E' possibile selezionare le singole fasce di prezzo (Cheap, Reasonable, Expensive) dal menù in alto a destra nella mappa
 
 ### Dataset
