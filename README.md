@@ -59,9 +59,9 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 - Il dataset è memorizzato nel database SQL 'ristoranti_sql.gz' compressa in *gzip* e successivamente diviso in parti di dimensioni minori di 25MB per poter essere caricato su GitHub;
 > **Ripristino (MySQL):** 
 > 
-> cat ristoranti_sql.gz.part-* > ristoranti_sql.gz
+> $ cat ristoranti_sql.gz.part-* > ristoranti_sql.gz
 > 
-> gunzip < 'ristoranti_sql.gz' | mysql -u [user] -p[pass]
+> $ gunzip < 'ristoranti_sql.gz' | mysql -u [user] -p[pass]
 
 
 ### Libraries
