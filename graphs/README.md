@@ -48,6 +48,9 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
 <img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.pn)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
 
 * wordcloud parole più frequenti delle recensioni di tutte le recensioni
+* <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px;" />
 * <img src="https://matteofasulo.github.io/PyTripAdvisor/img/food_all-2.png"
      alt="Markdown Monster icon"
      style="float: left; margin-right: 10px;" />
