@@ -1,7 +1,7 @@
 # Graphs
 ## [Sunburst](https://matteofasulo.github.io/PyTripAdvisor/graphs/sunburst.html)
-Attraverso il `sunburst` abbiamo rappresentato la distribuzione dei voti attribuiti alle recensioni e le loro relative fasce di prezzo corrispettive. Abbiamo notato che:
-* La maggior parte delle recensioni rientra nella fascia di prezzo `4 - 4.5` con predominanza dei ristoranti in fascia di prezzo media. La categoria dei ristoranti con 5 stelle, invece, presenta ugual numero di ristoranti di fascia economica e media. 
+Attraverso il `sunburst` abbiamo rappresentato la distribuzione della media dei voti delle recensioni e la loro relativa fascia di prezzo. Abbiamo notato che:
+* La maggior parte dei ristoranti rientra nella fascia di recensioni `4 - 4.5 stelle` con predominanza di quelli nella fascia media di prezzo. La categoria dei ristoranti con 5 stelle, invece, presenta una differenza minima tra il numero di ristoranti nella fascia economica e media. 
 
 ## [Rating per Price](https://matteofasulo.github.io/PyTripAdvisor/graphs/avg_rating_per_price.html)
 La rappresentazione della fascia di prezzo del ristorante in funzione del numero medio di recensioni aiuta a comprendere in media quando si scrive una recensione. Dividendo le diverse fasce di prezzo ognuna a seconda del rating della recensione scopriamo che:
