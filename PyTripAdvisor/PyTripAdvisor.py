@@ -920,6 +920,52 @@ class PyTripAdvisor:
         plt.savefig(f'wc_{img_path}.png')
         return wc
 
+
+def correction01():
+    locale = "it"
+    chrome_options = Options()
+    chrome_options.add_argument(f"--lang={locale}")
+    chrome_options.add_argument("start-maximized")
+    
+    chrome_prefs = {}
+    chrome_options.add_experimental_option( "prefs",{'profile.managed_default_content_settings.javascript': 2})
+    chrome_prefs["profile.default_content_settings"] = {"images": 2}
+    chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+    chrome_options.add_experimental_option('prefs', chrome_prefs)
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("--incognito")
+    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+
+    conn, cursor = db_connect()
+    cursor.execute("SELECT profile_link FROM (SELECT reviewers.profile_link, reviewers.reviewer_name, reviewers.total_reviews, reviewers.home, reviewers.total_cities, COUNT(reviews.reviewer_name) as recensioni_roma FROM reviews INNER JOIN reviewers ON reviews.reviewer_name = reviewers.reviewer_name GROUP BY reviews.reviewer_name) AS A WHERE recensioni_roma > total_reviews")
+    result = cursor.fetchall()
+    urls = [x[0] for x in result]
+    conn.close()
+
+    for url in urls:
+        driver.get(url)
+        if url == urls[0]:
+            try:
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Accetto']"))).click()     #Accetta i cookie
+            except Exception as e:
+                pass
+            
+        
+        container = driver.find_elements(By.XPATH, "//span[@class='fPMlM']")
+        contributes = container[0].text
+        while '.' in contributes:
+            contributes = contributes.replace('.','')
+        contributes = int(contributes)
+
+        conn, cursor = db_connect()
+        
+        cursor.execute("UPDATE reviewers SET total_reviews = %s WHERE profile_link = %s", (contributes,url))
+        conn.commit()
+        conn.close()
+
+
 if __name__ == "__main__":
     Bot = PyTripAdvisor()
     Bot.clear()
