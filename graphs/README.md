@@ -45,7 +45,7 @@ I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particol
 ## [Top Words](https://matteofasulo.github.io/PyTripAdvisor/graphs/hist_top_words.html)
 Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a partire da un dizionario di conteggi. Quest'ultimo è stato realizzato tokenizzando i testi delle recensioni di tutti i ristoranti, rimuovendo segni di punteggiatura e stopwords. Il grafico ci mostra come la parole più frequente è `molto` seguita da `locale` e `qualità` fino ad arrivare a `buona`.
 
-<img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.pn)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
+<img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.png)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
 
 * wordcloud parole più frequenti delle recensioni di tutte le recensioni
 * <img src="https://github.com/MatteoFasulo/PyTripAdvisor/img/food_all.png"
