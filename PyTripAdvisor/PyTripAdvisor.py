@@ -940,7 +940,10 @@ def correction01():
 
     conn, cursor = db_connect()
     cursor.execute("SELECT profile_link FROM (SELECT reviewers.profile_link, reviewers.reviewer_name, reviewers.total_reviews, reviewers.home, reviewers.total_cities, COUNT(reviews.reviewer_name) as recensioni_roma FROM reviews INNER JOIN reviewers ON reviews.reviewer_name = reviewers.reviewer_name GROUP BY reviews.reviewer_name) AS A WHERE recensioni_roma > total_reviews")
-    result = cursor.fetchall()
+    result1 = cursor.fetchall()
+    cursor.execute("SELECT profile_link FROM (SELECT reviewers.profile_link, reviewers.reviewer_name, reviewers.total_reviews, reviewers.home, reviewers.total_cities, COUNT(reviews.reviewer_name) as recensioni_roma FROM reviews INNER JOIN reviewers ON reviews.reviewer_name = reviewers.reviewer_name GROUP BY reviews.reviewer_name) AS A WHERE total_reviews IS NULL")
+    result2 = cursor.fetchall()
+    result = result1+result2
     urls = [x[0] for x in result]
     conn.close()
 
@@ -964,6 +967,48 @@ def correction01():
         cursor.execute("UPDATE reviewers SET total_reviews = %s WHERE profile_link = %s", (contributes,url))
         conn.commit()
         conn.close()
+
+	
+def get_top_reviewers():
+    conn, cursor = db_connect()
+    cursor.execute("SELECT `reviewers`.`reviewer_name`, `reviewers`.`total_cities`, `reviewers`.`reviewer_level`, `reviewers`.`home`, `reviewers`.`total_reviews`, COUNT(reviews.reviewer_name) as recensioni_roma, `reviewers`.`total_helpful` FROM reviews INNER JOIN reviewers ON reviews.reviewer_name = reviewers.reviewer_name WHERE `reviewers`.`home` IS NOT NULL AND `reviewers`.`total_reviews` IS NOT NULL AND `reviewers`.`total_helpful` IS NOT NULL AND `reviewers`.`reviewer_level` IS NOT NULL GROUP BY reviews.reviewer_name ORDER BY recensioni_roma DESC;")
+    rows = cursor.fetchall()
+    conn.close()
+
+    reviewer_name = list()
+    total_cities = list()
+    reviewer_level = list()
+    home = list()
+    total_reviews = list()
+    recensioni_roma = list()
+    total_helpful = list()
+    for row in rows:
+        if len(row) != 0:
+            reviewer_name.append(row[0])
+            total_cities.append(int(row[1]))
+            reviewer_level.append(int(row[2]))
+            home.append(row[3])
+            total_reviews.append(row[4])
+            recensioni_roma.append(row[5])
+            total_helpful.append(int(row[6]))
+
+    return reviewer_name, total_cities, reviewer_level, home, total_reviews, recensioni_roma, total_helpful
+	
+	
+def csv_top_reviews(filename='top_reviewers.csv'):
+    z, a,b,c,d,e,g = get_top_reviewers()
+    f = [round(int(e[i])/int(d[i])*100,1) for i in range(0,len(e))] #recensioni di roma / recensioni totali
+    diz = {'reviewer_name': z,
+             'total_cities': a,
+             'reviewer_level': b,
+             'home': c,
+             'total_reviews': d,
+             'recensioni_roma':e,
+             'total_helpful': g,
+             'percentuale_recensioni_romane': f}
+    df = pd.DataFrame(diz)
+
+    df.to_csv("top_reviewers.csv", encoding="utf-8")
 
 
 if __name__ == "__main__":
