@@ -44,11 +44,37 @@ I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particol
 
 ## [Top Words](https://matteofasulo.github.io/PyTripAdvisor/graphs/hist_top_words.html)
 Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a partire da un dizionario di conteggi. Quest'ultimo è stato realizzato tokenizzando i testi delle recensioni di tutti i ristoranti, rimuovendo segni di punteggiatura e stopwords. Il grafico ci mostra come la parole più frequente è `molto` seguita da `locale` e `qualità` fino ad arrivare a `buona`.
-
+<table border = "10px">
+  <tr> 
+    <td> <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png?raw=true"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px; width: 50%; height: auto" />  </td>
+    <td> <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/pizza_50.png?raw=true"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px; width: 50%; height: auto" />  </td>
+  </tr>
+  <tr> 
+    <td> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni di tutte le recensioni </i> </a> </td>
+    <td> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni < 50 </i>  </td>
+  </tr>
+  <tr> 
+    <td> <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/burger_50-1000.png?raw=true"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px; width: 50%; height: auto" /> </td>
+    <td> <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/frutta_+1000.png?raw=true"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px; width: 50%; height: auto" />  </td>
+  </tr>
+  <tr> 
+    <td> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con 50 < recensioni < 1000 </i> </td>
+    <td> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni > 1000 </i>  </td>
+  </tr>
+</table>
+  
 <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png?raw=true"
      alt="Markdown Monster icon"
      style="float: left; margin-right: 10px; width: 50%; height: auto" /> <br>
-     <i> Wordcloud parole più frequenti delle recensioni di tutte le recensioni </i> <br> <br>
+     <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni di tutte le recensioni </i> </a> <br> <br>
 
 <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/pizza_50.png?raw=true"
      alt="Markdown Monster icon"
