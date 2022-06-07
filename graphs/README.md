@@ -55,7 +55,7 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
   </tr>
   <tr> 
     <td width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni di tutte le recensioni </i> </a> </div> </td>
-    <td  width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/pizza_50.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni < 50 </i> </a> </div> </td>
+    <td  width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/pizza_50.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni <= 50 </i> </a> </div> </td>
   </tr>
   <tr> 
     <td width="500"; height="150"> <div align="center"> <img src="https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/burger_50-1000.png?raw=true"
@@ -66,7 +66,7 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
      style="float: left; margin-right: 10px" /> </div> </td>
   </tr>
   <tr> 
-    <td width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/burger_50-1000.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con 50 < recensioni < 1000 </i> </a> </div> </td>
+    <td width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/burger_50-1000.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con 50 < recensioni <= 1000 </i> </a> </div> </td>
     <td width="500"> <div align="center"> <a href = "https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/frutta_+1000.png?raw=true"> <i> Wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni > 1000 </i> </a> </div> </td>
   </tr>
 </table>
