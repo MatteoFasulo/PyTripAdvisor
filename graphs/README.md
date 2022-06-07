@@ -47,6 +47,11 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
 
 <img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.pn)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
 
+* Work cloud parole più frequenti di tutte le recensioni
+* word cloud parole dei ristoranti con meno di 50 recensioni (pizza)
+* wordcloud parole ristoranti con n recensioni maggiori di 1000 (frutta)
+* (panino)
+
 ## [Top Reviewers](https://matteofasulo.github.io/PyTripAdvisor/graphs/top_roman_reviewers.html)
 Un'ulteriore considerazione è stata applicata ai dati inerenti i recensori. Lo scatterplot mostra in particolare due recensori dalle caratteristiche completamente opposte:
 * il primo presenta un elevato numero di città in cui ha lasciato almeno una recensione, infatti, la percentuale delle recensioni su ristoranti romani è circa del 0.6%, inoltre gli altri utenti non le ritengono utili;
