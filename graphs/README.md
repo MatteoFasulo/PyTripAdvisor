@@ -47,10 +47,13 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
 
 <img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.pn)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
 
-* Work cloud parole più frequenti di tutte le recensioni
-* word cloud parole dei ristoranti con meno di 50 recensioni (pizza)
-* wordcloud parole ristoranti con n recensioni maggiori di 1000 (frutta)
-* (panino)
+* wordcloud parole più frequenti delle recensioni di tutte le recensioni
+* <img src="https://matteofasulo.github.io/PyTripAdvisor/img/food_all-2.png"
+     alt="Markdown Monster icon"
+     style="float: left; margin-right: 10px;" />
+* wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni < 50 (pizza)
+* wordcloud parole più frequenti delle recensioni dei ristoranti con 50 < recensioni < 1000 (panino)
+* wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni > 1000 (frutta)
 
 ## [Top Reviewers](https://matteofasulo.github.io/PyTripAdvisor/graphs/top_roman_reviewers.html)
 Un'ulteriore considerazione è stata applicata ai dati inerenti i recensori. Lo scatterplot mostra in particolare due recensori dalle caratteristiche completamente opposte:
