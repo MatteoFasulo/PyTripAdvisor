@@ -43,8 +43,12 @@ I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particol
 > **Info:** Il [Municipio XIV](https://it.wikipedia.org/wiki/Municipio_Roma_XIV) ha un punto percentuale in più di ristoranti con opzioni vegetariane rispetto al [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I).  
 
 ## [Top Words](https://matteofasulo.github.io/PyTripAdvisor/graphs/hist_top_words.html)
+Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a partire da un dizionario di conteggi. Quest'ultimo è stato realizzato tokenizzando i testi delle recensioni di tutti i ristoranti, rimuovendo segni di punteggiatura e stopwords. Il grafico ci mostra come la parole più frequente è `molto` seguita da `locale` e `qualità` fino ad arrivare a `buona`.
 
 ## [Top Reviewers](https://matteofasulo.github.io/PyTripAdvisor/graphs/top_roman_reviewers.html)
+Un'ulteriore considerazione è stata applicata ai dati inerenti i recensori. Lo scatterplot mostra in particolare due recensori dalle caratteristiche completamente opposte:
+* il primo presenta un elevato numero di città in cui ha lasciato almeno una recensione, infatti, la percentuale delle recensioni su ristoranti romani è circa del 0.6%, inoltre gli altri utenti non le ritengono utili;
+* il secondo presenta, invece, elevata percentuale di recensioni sui ristoranti romani, infatti vi è un minor numero di città visitate e in generale le sue recensioni sono state maggiormente apprezzate.
 
 ## Conclusioni
-...............
+In conclusione possiamo quindi dedurre che, nonostante la fascia più apprezzata sia quella **media**, il cliente ritiene comunque importante la **qualità** del **servizio**. Il suggerimento è quello di aprire un ristorante di qualità con un prezzo medio nella zona del [Municipio IX](https://it.wikipedia.org/wiki/Municipio_Roma_IX) con tipologia di cucina **pesce** e **mediterranea** proponendo diete **vegane** e **senza glutine**.
