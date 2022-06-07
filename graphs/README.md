@@ -44,6 +44,10 @@ I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particol
 
 ## [Top Words](https://matteofasulo.github.io/PyTripAdvisor/graphs/hist_top_words.html)
 Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a partire da un dizionario di conteggi. Quest'ultimo è stato realizzato tokenizzando i testi delle recensioni di tutti i ristoranti, rimuovendo segni di punteggiatura e stopwords. Il grafico ci mostra come la parole più frequente è `molto` seguita da `locale` e `qualità` fino ad arrivare a `buona`.
+* [WordCloud ristoranti con meno di 50 recensioni](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.png)
+*
+*
+*
 
 ## [Top Reviewers](https://matteofasulo.github.io/PyTripAdvisor/graphs/top_roman_reviewers.html)
 Un'ulteriore considerazione è stata applicata ai dati inerenti i recensori. Lo scatterplot mostra in particolare due recensori dalle caratteristiche completamente opposte:
