@@ -48,7 +48,7 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
 <img src="[markdownmonstericon.png](https://matteofasulo.github.io/PyTripAdvisor/img/burger_50-1000.png)" alt="Markdown Monster icon" style="float: left; margin-right: 10px;" />
 
 * wordcloud parole più frequenti delle recensioni di tutte le recensioni
-* <img src="(https://github.com/MatteoFasulo/PyTripAdvisor/img/food_all.png)"
+* <img src="(https://github.com/MatteoFasulo/PyTripAdvisor/blob/main/img/food_all.png)"
      alt="food_all"
      style="float: left; margin-right: 10px;" />
 * wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni < 50 (pizza)
