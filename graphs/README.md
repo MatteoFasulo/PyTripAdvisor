@@ -49,7 +49,7 @@ Per l'analisi delle 20 parole più ricorrenti, abbiamo creato un istogramma a pa
 
 * wordcloud parole più frequenti delle recensioni di tutte le recensioni
 * <img src="https://github.com/MatteoFasulo/PyTripAdvisor/img/food_all.png"
-     alt="Markdown Monster icon"
+     alt="food_all"
      style="float: left; margin-right: 10px;" />
 * wordcloud parole più frequenti delle recensioni dei ristoranti con recensioni < 50 (pizza)
 * wordcloud parole più frequenti delle recensioni dei ristoranti con 50 < recensioni < 1000 (panino)
