@@ -28,16 +28,16 @@ Nella `treemap` abbiamo riassunto sia il numero di ristoranti per municipio che 
 * Il [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I) nonostante fosse quello col maggior numero di recensioni, si posiziona a metà nel rating medio tra tutte le zone. 
 
 ## [Cuisine Types](https://matteofasulo.github.io/PyTripAdvisor/graphs/cuisine_types.html)
-L'analisi prosegue con lo studio dei diversi tipi di cucina di ogni ristorante di Roma. Dal momento che la maggior parte dei ristoranti ha come tipologia di cucina primaria quella `italiana`, abbiamo spostato l'attenzione sulla seconda, considerando quest'ultima come punto di partenza per l'analisi (scelto come tipo di cucina primario quello immediatamente successivo così da considerare il secondo tipo di cucina caratteristica di ogni ristorante). Selezionando, poi, i primi 10 tipi di cucina abbiamo notato che:
+L'analisi prosegue con lo studio dei diversi tipi di cucina di ogni ristorante di Roma. Dal momento che la maggior parte dei ristoranti ha come tipologia di cucina primaria quella `italiana`, abbiamo spostato l'attenzione sulla seconda, considerando quest'ultima come punto di partenza per l'analisi. Selezionando, poi, i primi 10 tipi di cucina abbiamo notato che:
 * la cucina giapponese non è molto apprezzata;
 * un'altissima percentuale di ristoranti ha come tipologia di cucina la pizza ma questa non rappresenta la categoria maggiormente apprezzata;
-* i ristoranti di **pesce** hanno, in media, un rating più elevato rispetto a qualunque altra categoria di cucina seguita da quella **mediterranea**.
+* i ristoranti di **pesce** hanno, in media, un rating più elevato rispetto a qualunque altra categoria di cucina, seguiti da quelli **mediterranei**.
 
 ## [Diet Types](https://matteofasulo.github.io/PyTripAdvisor/graphs/diet_types.html)
-Durante la fase di scraping abbiamo preso anche l'informazione sulle diete particolari come:
-* Ristoranti con opzioni vegetariane
-* Ristoranti con opzioni vegane
-* Ristoranti gluten-free
+Durante la fase di scraping abbiamo scaricato anche l'informazione sulle "restrizioni alimentari" come:
+* ristoranti con opzioni vegetariane;
+* ristoranti con opzioni vegane;
+* ristoranti gluten-free.
 
 I 3 `scatterplot` mostrano le percentuali di disponibilità delle diete particolari stratificati per municipio. Possiamo vedere come il [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I) sia sempre in cima per percentuale di ristoranti con diete particolari mentre il [Municipio VI](https://it.wikipedia.org/wiki/Municipio_Roma_VI) è sempre posizionato tra gli ultimi posti.
 > **Info:** Il [Municipio XIV](https://it.wikipedia.org/wiki/Municipio_Roma_XIV) ha un punto percentuale in più di ristoranti con opzioni vegetariane rispetto al [Municipio I](https://it.wikipedia.org/wiki/Municipio_Roma_I).  
