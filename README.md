@@ -77,11 +77,11 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 | [Random]| pseudo-random number generators for various distributions.
 | [Matplotlib]| library for creating static, animated, and interactive visualizations in Python.
 | [Plotly]| graphing library makes interactive, publication-quality graphs.
-| [Regex]| graphing library makes interactive, publication-quality graphs.
-| [Selenium]| graphing library makes interactive, publication-quality graphs.
-| [BeautifulSoup]| graphing library makes interactive, publication-quality graphs.
-| [MySQL]| graphing library makes interactive, publication-quality graphs.
-| [WordCloud]| graphing library makes interactive, publication-quality graphs.
+| [Regex]| regular expression matching operations similar to those found in Perl.
+| [Selenium]| API to write functional/acceptance tests using Selenium WebDriver.
+| [BeautifulSoup]| library for pulling data out of HTML and XML files.
+| [MySQL]| MySQL connector for python.
+| [WordCloud]| word cloud generator in Python.
 
 [os]: <https://docs.python.org/3/library/os.html>
 [json]: <https://docs.python.org/3/library/json.html>
@@ -97,3 +97,8 @@ La relazione è disponbilie al seguente [indirizzo](https://github.com/MatteoFas
 [Plotly]: <https://plotly.com/python/>
 [Kaleido]: <https://pypi.org/project/kaleido/>
 [MPL Toolkits]: <https://matplotlib.org/stable/tutorials/toolkits/mplot3d.html>
+[Regex]: <https://docs.python.org/3/library/re.html>
+[Selenium]: <https://selenium-python.readthedocs.io/>
+[BeautifulSoup]: <https://www.crummy.com/software/BeautifulSoup/bs4/doc/>
+[MySQL]: <https://dev.mysql.com/doc/connector-python/en/>
+[WordCloud]: <https://pypi.org/project/wordcloud/>
